@@ -1,0 +1,25 @@
+swagger: '2.0'
+basePath: '/v0'
+info:
+  title: HCA Data Tracker
+  description: Human Cell Atlas Data Tracker API
+  version: 0.0.1
+host: ${API_HOST}
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /projects:
+    get:
+      summary: "Retrieve all projects."
+      description: "Retrieve all project."
+      operationId: tracker.lambdas.api_server.core.get_projects
+      tags:
+        - API
+      responses:
+        "200":
+          description: "Payload of projects"

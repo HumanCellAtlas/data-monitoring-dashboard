@@ -1,0 +1,27 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:*"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:109067257620:table/dcp-data-dashboard-ingest-info-prod",
+        "arn:aws:dynamodb:us-east-1:109067257620:table/dcp-data-dashboard-matrix-info-prod",
+        "arn:aws:dynamodb:us-east-1:109067257620:table/dcp-data-dashboard-azul-info-prod",
+        "arn:aws:dynamodb:us-east-1:109067257620:table/dcp-data-dashboard-dss-info-prod",
+        "arn:aws:dynamodb:us-east-1:109067257620:table/dcp-data-dashboard-pipeline-info-prod"
+      ]
+    }
+  ]
+}
