@@ -1,0 +1,16 @@
+# Resolve the location of this file and set PROJECT_ROOT to the root
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
+export PROJECT_ROOT="$(cd -P "$(dirname "$SOURCE")/.." && pwd)"
+
+set -a
+SERVICE_NAME='tracker'
+DCP_DNS_DOMAIN='data.humancellatlas.org'
+DEPLOYMENT_STAGE="${DEPLOYMENT_STAGE:-prod}"
+API_HOST=${SERVICE_NAME}.${DEPLOYMENT_STAGE}.${DCP_DNS_DOMAIN}
+AWS_DEFAULT_REGION='us-east-1'
+GCP_ACCOUNT_ANALYSIS_INFO=${PROJECT_ROOT}/analysis_creds.json
+XDG_CONFIG_HOME='/tmp/.config'
+set +a
+
+echo "DEPLOYMENT STAGE IS \"${DEPLOYMENT_STAGE}\""

@@ -1,0 +1,236 @@
+<html style="padding:5px;">
+<link rel="stylesheet" href="tracker.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/css/foundation.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.foundation.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<div style="background-color: #FFFDDE; height:80px; border:thin solid #EDDD00">
+    <ul>
+        <li style='font-size:15px;padding-top:-5px;text-align:left;font-family:Verdana'><b>All new and existing projects stats are updated nightly between 1:00 AM-6:00 AM UTC. Table may not load during this period.</b></li>
+        <li style='font-size:15px;padding-top:-5px;text-align:left;font-family:Verdana'>The Matrix Service and Azul are currently indexed on projects prior to "re-ingestion". Sort by their columns to see what data is available.</li>
+        <li style='font-size:15px;padding-top:-5px;text-align:left;font-family:Verdana'>To report any issues or provide feature suggestions, please create tickets at <a href="https://github.com/HumanCellAtlas/data-monitoring-dashboard" target='_blank'>tracker github repo.</a></li>
+    </ul>
+</div>
+<div class="lds-ring"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+<table border="1" id="tracker" class="display hover" width=100% style="display:none">
+        <thead>
+            <tr>
+                <th colspan="5">Project Info</th>
+                <th colspan="3">Primary Data</th>
+                <th colspan="6">Analysis Data</th>
+            </tr>
+            <tr>
+                <th>Project Title</th>
+                <th>Submission Date</th>
+                <th>Project UUID</th>
+                <th>Ingest Submission Id</th>
+                <th>Ingest Submission Status</th>
+                <th>Ingest Primary Bundles Exported</th>
+                <th>DSS Primary Bundles Indexed</th>
+                <th>Azul Primary Bundles Indexed</th>
+                <th>Analysis Workflows</th>
+                <th>DSS Analysis Bundles Indexed</th>
+                <th>Azul Analysis Bundles Indexed</th>
+                <th>Matrix Analysis Bundles Indexed</th>
+                <th>Matrix Cell Count</th>
+                <th>Project Short Name</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Project Title</th>
+                <th>Submission Date</th>
+                <th>Project UUID</th>
+                <th>Ingest Submission Id</th>
+                <th>Ingest Submission Status</th>
+                <th>Ingest Primary Bundles Exported</th>
+                <th>DSS Primary Bundles Indexed</th>
+                <th>Azul Primary Bundles Indexed</th>
+                <th>Analysis Workflows</th>
+                <th>DSS Analysis Bundles Indexed</th>
+                <th>Azul Analysis Bundles Indexed</th>
+                <th>Matrix Analysis Bundles Indexed</th>
+                <th>Matrix Cell Count</th>
+                <th>Project Short Name</th>
+            </tr>
+        </tfoot>
+    </table>
+
+<script>
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1)
+}
+
+var small = function(str){
+    return '<small>' + str + '</small>'
+}
+
+var convert_to_red_div = function(str){
+    return '<div class="red">' + str + '</div>'
+}
+
+var convert_to_green_div = function(str){
+    return '<div class="green">' + str + '</div'
+}
+
+$(document).ready(function() {
+    var dataSet = []
+    $.getJSON( "https://n57ek0cuh9.execute-api.us-east-1.amazonaws.com/prod/v0/projects", function( data ) {
+      $.each( data, function( key, val ) {
+        var projectUUID = key
+        
+        ingest_info = val['dcp-data-dashboard-ingest-info-prod']
+        var lastUpdatedAt = new Date(ingest_info['updated_at']).toLocaleString()
+        var submissionDate = new Date(ingest_info['submission_date']).toISOString().substring(0, 10);
+        var projectTitle = '<b>' + ingest_info['project_title'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt
+        var projectShortName = '<b>' + ingest_info['project_short_name'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt
+        var submissionId = ingest_info['submission_id']
+        var submissionStatus = ingest_info['submission_status']
+        if(submissionStatus != 'Complete'){
+            submissionStatus = convert_to_red_div(small(submissionStatus))
+        }
+        else{
+            submissionStatus = convert_to_green_div(small(submissionStatus))
+        }
+        var ingestPrimaryBundleCount = ingest_info['submission_bundles_exported_count']
+        if(parseInt(ingestPrimaryBundleCount) == 0){
+            ingestPrimaryBundleCountDisplay = convert_to_red_div(small(ingestPrimaryBundleCount))
+        }
+        else{
+            ingestPrimaryBundleCountDisplay = convert_to_green_div(small(ingestPrimaryBundleCount))
+        }
+
+        dss_info = val['dcp-data-dashboard-dss-info-prod']
+        var dssAwsPrimaryBundleCount = dss_info['aws_primary_bundle_count']
+        var dssAwsAnalysisBundleCount = dss_info['aws_analysis_bundle_count']
+        var dssGcpPrimaryBundleCount = dss_info['gcp_primary_bundle_count']
+        var dssGcpAnalysisBundleCount = dss_info['gcp_analysis_bundle_count']
+        var dssPrimaryBundleCountDisplay = "AWS: " + dssAwsPrimaryBundleCount + "<br>GCP: " + dssGcpPrimaryBundleCount
+        var dssAnalysisBundleCountDisplay = "AWS: " + dssAwsAnalysisBundleCount + "<br>GCP: " + dssGcpAnalysisBundleCount
+        if(parseInt(dssAwsPrimaryBundleCount) != parseInt(ingestPrimaryBundleCount) || parseInt(dssGcpPrimaryBundleCount) != parseInt(ingestPrimaryBundleCount)){
+            dssPrimaryBundleCountDisplay = convert_to_red_div(small(dssPrimaryBundleCountDisplay))
+        }
+        else{
+            dssPrimaryBundleCountDisplay = convert_to_green_div(small(dssPrimaryBundleCountDisplay))
+        }
+
+        var project_workflows_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}'
+        var project_and_status_wfs_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}%26status%3D{WORKFLOW_STATUS}'
+        analysis_info = val['dcp-data-dashboard-analysis-info-prod']
+        var workflowLink = project_workflows_template.replace('{PROJECT_UUID}', projectUUID)
+        var workflowStatsDisplay = '<a href="' + workflowLink + '"target="_blank">' + 'Total: ' + analysis_info['total_workflows'] + '</a>' + '<br>'
+        $.each(analysis_info, function( key, val ) {
+            if(key.includes('_workflows') && key != 'total_workflows'){
+                var workflowStatus = key.split('_workflows')[0].capitalize()
+                var workflowLink = project_and_status_wfs_template.replace('{PROJECT_UUID}', projectUUID).replace('{WORKFLOW_STATUS}', workflowStatus)
+                var worfklowStatusMessage = '<a href="' + workflowLink + '"target="_blank">' + workflowStatus + ': ' + val + '</a>'
+                workflowStatsDisplay = workflowStatsDisplay + worfklowStatusMessage + '<br>'
+            }
+        })
+        if(parseInt(analysis_info['total_workflows']) > 0 && parseInt(analysis_info['succeeded_workflows']) < dssGcpPrimaryBundleCount) {
+            workflowStatsDisplay = convert_to_red_div(small(workflowStatsDisplay))
+        }
+        else{
+            workflowStatsDisplay = convert_to_green_div(small(workflowStatsDisplay))
+        }
+
+        if(parseInt(analysis_info['total_workflows']) > 0 && (parseInt(dssGcpAnalysisBundleCount) != parseInt(analysis_info['succeeded_workflows']) || parseInt(dssAwsAnalysisBundleCount) != parseInt(analysis_info['succeeded_workflows'])) && (parseInt(dssGcpAnalysisBundleCount) != parseInt(dssGcpPrimaryBundleCount) || parseInt(dssAwsAnalysisBundleCount) != parseInt(dssGcpPrimaryBundleCount))){
+            dssAnalysisBundleCountDisplay = convert_to_red_div(small(dssAnalysisBundleCountDisplay))
+        }
+        else{
+            dssAnalysisBundleCountDisplay = convert_to_green_div(small(dssAnalysisBundleCountDisplay))
+        }
+
+        azul_info = val['dcp-data-dashboard-azul-info-prod']
+        var azulPrimaryBundleCount = azul_info['primary_bundle_count']
+        var azulAnalysisBundleCount = azul_info['analysis_bundle_count']
+        // var azulCellCount = "5"
+        if(parseInt(azulPrimaryBundleCount) != parseInt(dssAwsPrimaryBundleCount)){
+            azulPrimaryBundleCountDisplay = convert_to_red_div(small(azulPrimaryBundleCount))
+        }
+        else{
+            azulPrimaryBundleCountDisplay = convert_to_green_div(small(azulPrimaryBundleCount))
+        }
+        if(parseInt(azulAnalysisBundleCount) != parseInt(dssAwsAnalysisBundleCount)){
+            azulAnalysisBundleCountDisplay = convert_to_red_div(small(azulAnalysisBundleCount))
+        }
+        else{
+            azulAnalysisBundleCountDisplay = convert_to_green_div(small(azulAnalysisBundleCount))
+        }
+
+        matrix_info = val['dcp-data-dashboard-matrix-info-prod']
+        var matrixAnalysisBundleCount = matrix_info['analysis_bundle_count']
+        var matrixCellCount = matrix_info['cell_count']
+
+        if(parseInt(matrixAnalysisBundleCount) != parseInt(dssAwsAnalysisBundleCount)){
+            matrixAnalysisBundleCountDisplay = convert_to_red_div(small(matrixAnalysisBundleCount))
+            matrixCellCountDisplay = convert_to_red_div(small(matrixCellCount))
+        }
+        else {
+            matrixAnalysisBundleCountDisplay = convert_to_green_div(small(matrixAnalysisBundleCount))
+            matrixCellCountDisplay = convert_to_green_div(small(matrixCellCount))
+        }
+        
+        var project = [
+            convert_to_green_div(projectTitle), 
+            convert_to_green_div(small(submissionDate)),
+            convert_to_green_div(small(projectUUID)), 
+            convert_to_green_div(small(submissionId)), 
+            submissionStatus,
+            ingestPrimaryBundleCountDisplay,
+            dssPrimaryBundleCountDisplay,
+            azulPrimaryBundleCountDisplay,
+            workflowStatsDisplay,
+            dssAnalysisBundleCountDisplay,
+            azulAnalysisBundleCountDisplay,
+            matrixAnalysisBundleCountDisplay,
+            matrixCellCountDisplay,
+            convert_to_green_div(projectShortName)
+        ]
+        dataSet.push(project);
+      });
+        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+            "num-html-pre": function ( a ) {
+                var x = String(a).replace( /<[\s\S]*?>/g, "" );
+                return parseFloat( x );
+            },
+         
+            "num-html-asc": function ( a, b ) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+         
+            "num-html-desc": function ( a, b ) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+      $('#tracker').DataTable({
+        iDisplayLength: 10,
+        data: dataSet,
+        order: [[ 1, "desc" ]],
+        columnDefs: [
+            {
+                targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+                className: 'dt-left'
+            },
+            {
+                targets: [1, 2, 8],
+                className: 'dt-nowrap'
+            },
+            { type: 'num-html', targets: [5, 7, 10, 11, 12] }
+        ],
+        drawCallback: function( settings ) {
+            $('.red').parent('.dt-left').css('background', '#f5dad6');
+            $('.red').parent('.dt-left').prop('title', 'Unexpected value found. Further Investigation required');
+        }
+      });
+      $('#tracker_filter').css("color", "#b92525");
+      $('#tracker_filter').css("font-size", "25px");
+      $('#tracker_filter').css("float", "left");
+      $('#tracker_length').css("float", "right");
+      $('input').css("width", "300px");
+      $('.lds-ring').hide();
+      $('#tracker').show();
+    });
+})
+</script>
+</html>

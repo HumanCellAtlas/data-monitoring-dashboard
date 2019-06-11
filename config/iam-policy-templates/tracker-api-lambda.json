@@ -1,0 +1,27 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:*"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-ingest-info-${DEPLOYMENT_STAGE}",
+        "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-matrix-info-${DEPLOYMENT_STAGE}",
+        "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-azul-info-${DEPLOYMENT_STAGE}",
+        "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-dss-info-${DEPLOYMENT_STAGE}",
+        "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-analysis-info-${DEPLOYMENT_STAGE}"
+      ]
+    }
+  ]
+}

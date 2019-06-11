@@ -1,0 +1,17 @@
+{
+  "version": "2.0",
+  "app_name": "tracker-api",
+  "environment_variables": {},
+  "stages": {
+    "prod": {
+      "api_gateway_stage": "prod",
+      "environment_variables": {
+        "DEPLOYMENT_STAGE": "prod",
+        "API_HOST": "tracker.prod.data.humancellatlas.org",
+        "XDG_CONFIG_HOME": "/tmp/.config"
+      }
+    }
+  },
+  "lambda_timeout": 300,
+  "lambda_memory_size": 512
+}
