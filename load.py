@@ -37,7 +37,7 @@ def main():
     for envelope in primary_envelopes:
         submission_id = ingest_agent.get_submission_id_from_envelope(envelope)
         # submission_id = envelope['submission_id']
-        track_envelope_data_moving_through_dcp(submission_id, failures)
+        pool.add_task(track_envelope_data_moving_through_dcp, submission_id, failures)
     pool.wait_for_completion()
     print(f"{len(failures)} projects failed during refresh")
     if len(failures) > 0:

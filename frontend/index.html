@@ -129,11 +129,17 @@ $(document).ready(function() {
         if(parseInt(analysis_info['total_workflows']) > 0 && parseInt(analysis_info['succeeded_workflows']) < dssGcpPrimaryBundleCount) {
             workflowStatsDisplay = convert_to_red_div(small(workflowStatsDisplay))
         }
+        else if (parseInt(analysis_info['total_workflows']) > 0 && analysis_info['succeeded_workflows'] == undefined){
+            workflowStatsDisplay = convert_to_red_div(small(workflowStatsDisplay))
+        }
         else{
             workflowStatsDisplay = convert_to_green_div(small(workflowStatsDisplay))
         }
 
-        if(parseInt(analysis_info['total_workflows']) > 0 && (parseInt(dssGcpAnalysisBundleCount) != parseInt(analysis_info['succeeded_workflows']) || parseInt(dssAwsAnalysisBundleCount) != parseInt(analysis_info['succeeded_workflows'])) && (parseInt(dssGcpAnalysisBundleCount) != parseInt(dssGcpPrimaryBundleCount) || parseInt(dssAwsAnalysisBundleCount) != parseInt(dssGcpPrimaryBundleCount))){
+        if (parseInt(analysis_info['total_workflows']) > 0 && analysis_info['succeeded_workflows'] == undefined){
+            dssAnalysisBundleCountDisplay = convert_to_green_div(small(dssAnalysisBundleCountDisplay))
+        }
+        else if(parseInt(analysis_info['total_workflows']) > 0 && (parseInt(dssGcpAnalysisBundleCount) != parseInt(analysis_info['succeeded_workflows']) || parseInt(dssAwsAnalysisBundleCount) != parseInt(analysis_info['succeeded_workflows'])) && (parseInt(dssGcpAnalysisBundleCount) != parseInt(dssGcpPrimaryBundleCount) || parseInt(dssAwsAnalysisBundleCount) != parseInt(dssGcpPrimaryBundleCount))){
             dssAnalysisBundleCountDisplay = convert_to_red_div(small(dssAnalysisBundleCountDisplay))
         }
         else{
