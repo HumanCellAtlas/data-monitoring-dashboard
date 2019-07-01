@@ -192,7 +192,10 @@ $(document).ready(function() {
             matrixCellCountDisplay,
             convert_to_green_div(projectShortName)
         ]
-        dataSet.push(project);
+
+        if(parseInt(dssAwsPrimaryBundleCount) > 0 || parseInt(dssAwsAnalysisBundleCount) > 0 || parseInt(dssGcpPrimaryBundleCount) > 0 || parseInt(dssGcpAnalysisBundleCount) > 0 || parseInt(azulPrimaryBundleCount) > 0 || parseInt(azulAnalysisBundleCount) > 0 || parseInt(matrixAnalysisBundleCount) > 0) {
+            dataSet.push(project);
+        }
       });
         jQuery.extend( jQuery.fn.dataTableExt.oSort, {
             "num-html-pre": function ( a ) {
@@ -209,7 +212,7 @@ $(document).ready(function() {
             }
         });
       $('#tracker').DataTable({
-        iDisplayLength: 10,
+        iDisplayLength: 25,
         data: dataSet,
         order: [[ 1, "desc" ]],
         columnDefs: [
