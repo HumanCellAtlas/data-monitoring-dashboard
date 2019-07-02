@@ -3,7 +3,7 @@ botocore==1.12.119
 connexion==1.5.2
 tenacity==5.0.2
 requests==2.20.0
-cromwell-tools>=1.1.2
+cromwell-tools>=2.2.0,<3
 termcolor
 hca
 psycopg2==2.7.5

@@ -4,25 +4,32 @@ import json
 
 from cromwell_tools import api as cwm_api
 from cromwell_tools import cromwell_auth as cwm_auth
+from typing import List, Dict
 
 
 class AnalysisAgent:
-    def __init__(self):
+    def __init__(self) -> None:
+        """Interacts with the HCA DCP Pipelines Execution Service."""
         deployment = os.environ['DEPLOYMENT_STAGE']
         self.cromwell_url = 'https://cromwell.caas-prod.broadinstitute.org'
         self.cromwell_collection = 'lira-test' if deployment == 'integration' else f'lira-{deployment}'
         gcp_credentials_file_for_analysis = os.environ.get('GCP_ACCOUNT_ANALYSIS_INFO')
         if gcp_credentials_file_for_analysis:
-            with open(gcp_credentials_file_for_analysis, 'r') as f:
-                service_account_key = json.load(f)
-            self.auth = self._get_auth(service_account_key)
+            self.auth = cwm_auth.CromwellAuth.harmonize_credentials(service_account_key=gcp_credentials_file_for_analysis,
+                                                                    url=self.cromwell_url)
 
-    def _get_auth(self, service_account_key):
-        """Helper function to generate the auth object to talk to Secondary-analysis service."""
-        return cwm_auth.CromwellAuth.harmonize_credentials(service_account_key=service_account_key,
-                                                           url=self.cromwell_url)
+    def get_workflows_for_project_uuid(self, project_uuid: str, with_labels: bool = True) -> List[Dict[str, str]]:
+        """Query the workflows in secondary analysis by project uuid.
 
-    def get_workflows_for_project_uuid(self, project_uuid, with_labels=True):
+        Args:
+            project_uuid: The UUID of an ingested HCA DCP data project.
+            with_labels: Whether to include all workflow labels information in the result. Note
+                setting this to True will put some extra stress on the secondary analysis service
+                and might be slower to query.
+        
+        Returns:
+            result: A list of workflow metadata blocks that matched the query.
+        """
         query_dict = {
             "label": {
                 "project_uuid": project_uuid
@@ -30,9 +37,10 @@ class AnalysisAgent:
         }
         if with_labels:
             query_dict['additionalQueryResultFields'] = ['labels']
+
+        # to only query within the collection that associated with the current deployment
         query_dict['label']['caas-collection-name'] = self.cromwell_collection
 
-        response = cwm_api.query(query_dict=query_dict, auth=self.auth)
-        response.raise_for_status()
-        result = response.json()
-        return result['results']
+        response = cwm_api.query(query_dict=query_dict, auth=self.auth, raise_for_status=True)
+        result = response.json()['results']
+        return result
