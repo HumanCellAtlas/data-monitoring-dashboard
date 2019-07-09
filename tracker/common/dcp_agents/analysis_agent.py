@@ -2,8 +2,7 @@ import logging
 import os
 import json
 
-from cromwell_tools import api as cwm_api
-from cromwell_tools import cromwell_auth as cwm_auth
+import cromwell_tools
 from typing import List, Dict
 
 
@@ -14,9 +13,8 @@ class AnalysisAgent:
         self.cromwell_url = 'https://cromwell.caas-prod.broadinstitute.org'
         self.cromwell_collection = 'lira-test' if deployment == 'integration' else f'lira-{deployment}'
         gcp_credentials_file_for_analysis = os.environ.get('GCP_ACCOUNT_ANALYSIS_INFO')
-        if gcp_credentials_file_for_analysis:
-            self.auth = cwm_auth.CromwellAuth.harmonize_credentials(service_account_key=gcp_credentials_file_for_analysis,
-                                                                    url=self.cromwell_url)
+        self.auth = cromwell_tools.cromwell_auth.CromwellAuth.harmonize_credentials(service_account_key=gcp_credentials_file_for_analysis,
+                                                                                    url=self.cromwell_url)
 
     def get_workflows_for_project_uuid(self, project_uuid: str, with_labels: bool = True) -> List[Dict[str, str]]:
         """Query the workflows in secondary analysis by project uuid.
@@ -41,6 +39,6 @@ class AnalysisAgent:
         # to only query within the collection that associated with the current deployment
         query_dict['label']['caas-collection-name'] = self.cromwell_collection
 
-        response = cwm_api.query(query_dict=query_dict, auth=self.auth, raise_for_status=True)
+        response = cromwell_tools.api.query(query_dict=query_dict, auth=self.auth, raise_for_status=True)
         result = response.json()['results']
         return result
