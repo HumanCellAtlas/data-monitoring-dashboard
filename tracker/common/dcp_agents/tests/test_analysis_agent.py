@@ -32,7 +32,7 @@ def deployments():
 
 class TestAnalysisAgent(object):
     def test_analysis_agent_raises_exception_when_no_deployment_specified(self, monkeypatch):
-        monkeypatch.delenv('DEPLOYMENT_STAGE')
+        monkeypatch.delenv('DEPLOYMENT_STAGE', raising=False)
         with pytest.raises(KeyError):
             agent = analysis_agent.AnalysisAgent()
             assert agent
