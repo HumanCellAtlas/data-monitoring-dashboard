@@ -1,1 +1,6 @@
 deployment_stage = "XXX"
+analysis_gcp_creds = "base 64 encoded serialized json service account credentials with access to cromwell api"
+allowed_subnet_ids = "subnet-xxx, subnetxxx"
+security_group_id = "sg-xxx"
+refresher_schedule_expression = "https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
+data_refresher_docker_image = "humancellatlas/data-monitoring-data-refresher:1"

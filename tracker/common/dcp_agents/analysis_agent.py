@@ -1,9 +1,12 @@
+import base64
 import logging
 import os
 import json
 
 import cromwell_tools
 from typing import List, Dict
+
+from tracker.common.config import TrackerInfraConfig
 
 
 class AnalysisAgent:
@@ -12,9 +15,12 @@ class AnalysisAgent:
         deployment = os.environ['DEPLOYMENT_STAGE']
         self.cromwell_url = 'https://cromwell.caas-prod.broadinstitute.org'
         self.cromwell_collection = 'lira-test' if deployment == 'integration' else f'lira-{deployment}'
-        gcp_credentials_file_for_analysis = os.environ.get('GCP_ACCOUNT_ANALYSIS_INFO')
-        self.auth = cromwell_tools.cromwell_auth.CromwellAuth.harmonize_credentials(service_account_key=gcp_credentials_file_for_analysis,
+        self.auth = cromwell_tools.cromwell_auth.CromwellAuth.harmonize_credentials(service_account_key=self.analysis_gcp_creds,
                                                                                     url=self.cromwell_url)
+
+    @property
+    def analysis_gcp_creds(self):
+        return json.loads(base64.b64decode(TrackerInfraConfig().analysis_gcp_creds).decode())
 
     def get_workflows_for_project_uuid(self, project_uuid: str, with_labels: bool = True) -> List[Dict[str, str]]:
         """Query the workflows in secondary analysis by project uuid.
