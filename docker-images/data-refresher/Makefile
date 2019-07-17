@@ -1,0 +1,34 @@
+HUB_ORG=humancellatlas
+IMAGE=data-monitoring-data-refresher
+VERSION=$(shell cat VERSION)
+
+# Modus operandi
+# --------------
+# make bump_version
+#	make some changes
+# make build
+# make test
+#	test locally
+# make push
+#	test with explicit version number from Docker Hub
+
+build:
+	mkdir -p code
+	cp -R ../../requirements.txt code/
+	cp -R ../../tracker code/
+	cp load.py code
+	docker build -t $(IMAGE):$(VERSION) .
+	rm -rf code/
+
+push:
+	$(eval VERSION=$(shell cat VERSION))
+	docker tag $(IMAGE):$(VERSION) $(HUB_ORG)/$(IMAGE):$(VERSION)
+	docker push $(HUB_ORG)/$(IMAGE):$(VERSION)
+
+bump_version:
+	expr `cat VERSION` + 1 > VERSION
+
+test:
+	docker run -e DEPLOYMENT_STAGE=${DEPLOYMENT_STAGE} -e AWS_DEFAULT_REGION=us-east-1 -v ~/.aws:/root/.aws -e AWS_PROFILE=hca-${DEPLOYMENT_STAGE} --rm -it $(IMAGE):$(VERSION)
+
+.phony: build bump_version promote push

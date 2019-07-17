@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 import json
@@ -5,17 +6,19 @@ import json
 from cromwell_tools import api as cwm_api
 from cromwell_tools import cromwell_auth as cwm_auth
 
+from tracker.common.config import TrackerInfraConfig
+
 
 class AnalysisAgent:
     def __init__(self):
         deployment = os.environ['DEPLOYMENT_STAGE']
         self.cromwell_url = 'https://cromwell.caas-prod.broadinstitute.org'
         self.cromwell_collection = 'lira-test' if deployment == 'integration' else f'lira-{deployment}'
-        gcp_credentials_file_for_analysis = os.environ.get('GCP_ACCOUNT_ANALYSIS_INFO')
-        if gcp_credentials_file_for_analysis:
-            with open(gcp_credentials_file_for_analysis, 'r') as f:
-                service_account_key = json.load(f)
-            self.auth = self._get_auth(service_account_key)
+        self.auth = self._get_auth(self.analysis_gcp_creds)
+
+    @property
+    def analysis_gcp_creds(self):
+        return json.loads(base64.b64decode(TrackerInfraConfig().analysis_gcp_creds).decode())
 
     def _get_auth(self, service_account_key):
         """Helper function to generate the auth object to talk to Secondary-analysis service."""

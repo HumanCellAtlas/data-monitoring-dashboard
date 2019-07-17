@@ -49,3 +49,4 @@ chalice/requirements.txt
 chalice/vendor/*
 
 .terraform/
+*terraform.tfvars

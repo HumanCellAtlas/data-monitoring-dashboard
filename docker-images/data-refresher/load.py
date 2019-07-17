@@ -32,11 +32,9 @@ def main():
     ingest_agent = IngestAgent()
     primary_envelopes = ingest_agent.get_all_primary_submission_envelopes()
     ingest_dynamo_agent = IngestDynamoAgent()
-    # primary_envelopes = ingest_dynamo_agent.get_all_items()['records']
     pool = ThreadPool()
     for envelope in primary_envelopes:
         submission_id = ingest_agent.get_submission_id_from_envelope(envelope)
-        # submission_id = envelope['submission_id']
         pool.add_task(track_envelope_data_moving_through_dcp, submission_id, failures)
     pool.wait_for_completion()
     print(f"{len(failures)} projects failed during refresh")
