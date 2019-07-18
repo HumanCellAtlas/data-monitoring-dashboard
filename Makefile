@@ -7,7 +7,10 @@ test: lint
 lint:
 	flake8 $(MODULES) *.py
 
-deploy:
+deploy: deploy_api deploy_frontend
+
+deploy_api:
 	cd chalice && make deploy
+
+deploy_frontend:
 	cd frontend && make deploy
-	aws cloudfront create-invalidation --distribution-id E2Y2LM41A9RNBP --paths "/*" --profile hca-prod

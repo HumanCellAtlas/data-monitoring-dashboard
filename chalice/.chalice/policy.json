@@ -22,6 +22,17 @@
         "arn:aws:dynamodb:us-east-1:109067257620:table/dcp-data-dashboard-dss-info-prod",
         "arn:aws:dynamodb:us-east-1:109067257620:table/dcp-data-dashboard-analysis-info-prod"
       ]
+    },
+    {
+        "Effect": "Allow",
+        "Action": [
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:GetSecretValue"
+        ],
+        "Resource": [
+          "arn:aws:secretsmanager:us-east-1:109067257620:secret:dcp/matrix/prod/*",
+          "arn:aws:secretsmanager:us-east-1:109067257620:secret:dcp/tracker/prod/*"
+        ]
     }
   ]
 }

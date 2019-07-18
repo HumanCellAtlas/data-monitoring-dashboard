@@ -2,15 +2,13 @@ HUB_ORG=humancellatlas
 IMAGE=data-monitoring-data-refresher
 VERSION=$(shell cat VERSION)
 
-# Modus operandi
+# Modus operandi for testing and releasing changes.
 # --------------
 # make bump_version
-#	make some changes
 # make build
 # make test
-#	test locally
+#	test image locally. Expects target env var DEPLOYMENT_STAGE to be set.
 # make push
-#	test with explicit version number from Docker Hub
 
 build:
 	mkdir -p code
