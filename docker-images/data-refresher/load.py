@@ -31,7 +31,6 @@ def main():
     failures = {}
     ingest_agent = IngestAgent()
     primary_envelopes = ingest_agent.get_all_primary_submission_envelopes()
-    ingest_dynamo_agent = IngestDynamoAgent()
     pool = ThreadPool()
     for envelope in primary_envelopes:
         submission_id = ingest_agent.get_submission_id_from_envelope(envelope)

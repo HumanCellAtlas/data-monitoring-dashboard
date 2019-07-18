@@ -17,6 +17,8 @@ class IngestDynamoAgent(DynamoAgent):
         payload = {}
         envelope = self.ingest_agent.get_envelope(submission_id)
         project = self.ingest_agent.get_project(submission_id)
+        biomaterials = self.ingest_agent.get_biomaterials(submission_id)
+        protocols = self.ingest_agent.get_protocols(submission_id)
         bundle_manifest_count = self.ingest_agent.get_bundle_manifest_count(submission_id)
         project_uuid = project['uuid']['uuid']
         payload['submission_id'] = submission_id
@@ -26,5 +28,7 @@ class IngestDynamoAgent(DynamoAgent):
         payload['project_title'] = self.ingest_agent.get_project_title_from_project(project)
         payload['submission_status'] = envelope['submissionState']
         payload['submission_bundles_exported_count'] = bundle_manifest_count
+        payload['species'] = self.ingest_agent.get_unique_species_set_from_biomaterials(biomaterials)
+        payload['library_construction_methods'] = self.ingest_agent.get_unique_library_construction_methods_from_protocols(protocols)
         self.write_item_to_dynamo(payload)
         return project_uuid

@@ -3,7 +3,7 @@ import os
 import requests
 from hca.util.pool import ThreadPool
 
-STATUSES_TO_EXCLUDE_FROM_TRACKER = ['Invalid', 'Draft', 'Valid', 'Pending', 'Validating']
+STATUSES_TO_EXCLUDE_FROM_TRACKER = ['Invalid', 'Draft', 'Valid', 'Pending', 'Validating', 'Submitted']
 PROJECT_NAME_STRINGS_TO_EXCLUDE_FROM_TRACKER = [
     'prod/optimus/',
     'prod/Smart-seq2/',
@@ -47,19 +47,55 @@ class IngestAgent:
         project = body['_embedded']['projects'][0]
         return project
 
+    # TODO consolidate logic in get_biomaterials and get_protocols
+    def get_biomaterials(self, submission_id):
+        biomaterials = []
+        envelope = self.get_envelope(submission_id)
+        biomaterials_url = f"{envelope['_links']['biomaterials']['href']}/?size=1000"
+        while True:
+            response = requests.get(biomaterials_url)
+            response.raise_for_status()
+            body = response.json()
+            if not body.get('_embedded'):
+                break
+            biomaterials = biomaterials + body['_embedded']['biomaterials']
+            links = body['_links']
+            next_link = links.get('next')
+            if not next_link:
+                break
+            biomaterials_url = next_link['href']
+        return biomaterials
+
+    #TODO consolidate logic in get_biomaterials and get_protocols
+    def get_protocols(self, submission_id):
+        protocols = []
+        envelope = self.get_envelope(submission_id)
+        protocols_url = f"{envelope['_links']['protocols']['href']}/?size=1000"
+        while True:
+            response = requests.get(protocols_url)
+            response.raise_for_status()
+            body = response.json()
+            if not body.get('_embedded'):
+                break
+            protocols = protocols + body['_embedded']['protocols']
+            links = body['_links']
+            next_link = links.get('next')
+            if not next_link:
+                break
+            protocols_url = next_link['href']
+        return protocols
+
     def get_bundle_manifest_count(self, submission_id):
         envelope = self.get_envelope(submission_id)
         bundle_manifest_url = envelope['_links']['bundleManifests']['href']
         response = requests.get(bundle_manifest_url)
         response.raise_for_status()
         bundle_manifest_count = response.json()['page']['totalElements']
-        if submission_id == '5cda8757d96dad000856d2ae':
-            bundle_manifest_count = '3514'
         return bundle_manifest_count
 
     def get_all_primary_submission_envelopes(self):
         all_envelopes = []
-        url = f"{self.base_url}/submissionEnvelopes?size=100"
+        url = f"{self.base_url}/submissionEnvelopes?size=1000"
         while True:
             response = requests.get(url)
             response.raise_for_status()
@@ -75,10 +111,12 @@ class IngestAgent:
         primary_submission_envelopes = self._parse_primary_envelopes_from_envelopes(all_envelopes)
         return primary_submission_envelopes
 
+    # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
     def get_submission_id_from_envelope(self, envelope):
         submission_id = envelope['_links']['self']['href'].split('/')[-1]
         return submission_id
 
+    # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
     def get_project_short_name_from_project(self, project):
         project_core = project['content']['project_core']
         if project_core.get('project_short_name'):
@@ -87,11 +125,53 @@ class IngestAgent:
             project_short_name = project['content']['project_core']['project_shortname']
         return project_short_name
 
+    # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
     def get_project_title_from_project(self, project):
         project_core = project['content']['project_core']
         project_title = project_core['project_title']
         return project_title
 
+    # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
+    def get_unique_species_set_from_biomaterials(self, biomaterials):
+        project_species = set()
+        for biomaterial in biomaterials:
+            try:
+                content = biomaterial['content']
+            except:
+                import pdb; pdb.set_trace()
+            if content.get('genus_species'):
+                genus_species = content['genus_species']
+                for species in genus_species:
+                    if species.get('ontology_label'):
+                        project_species.add(species['ontology_label'])
+                    elif species.get('text'):
+                        project_species.add(species['text'])
+        if len(project_species) == 0:
+            raise Exception('No species found from biomaterials in this project')
+        return sorted(project_species)
+
+    # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
+    def get_unique_library_construction_methods_from_protocols(self, protocols):
+        project_library_construction_methods = set()
+        for protocol in protocols:
+            content = protocol['content']
+            if content.get('library_construction_method'):
+                library_construction_method = content['library_construction_method']
+                if library_construction_method.get('ontology_label'):
+                    project_library_construction_methods.add(library_construction_method['ontology_label'])
+                elif library_construction_method.get('text'):
+                    project_library_construction_methods.add(library_construction_method['text'])
+            elif content.get('library_construction_approach'):
+                library_construction_approach = content['library_construction_approach']
+                if library_construction_approach.get('ontology_label'):
+                    project_library_construction_methods.add(library_construction_approach['ontology_label'])
+                elif library_construction_approach.get('text'):
+                    project_library_construction_methods.add(library_construction_approach['text'])
+        if len(project_library_construction_methods) == 0:
+            raise Exception('No library construction methods found from protocols in this project')
+        return sorted(project_library_construction_methods)
+
+    # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
     def _project_short_name_in_exclusion_list(self, project_short_name):
         excluded = False
         for name in PROJECT_NAME_STRINGS_TO_EXCLUDE_FROM_TRACKER:
@@ -99,6 +179,7 @@ class IngestAgent:
                 excluded = True
         return excluded
 
+    # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
     def _parse_primary_envelopes_from_envelopes(self, envelopes):
         primary_submission_envelopes = []
         pool = ThreadPool()
@@ -109,6 +190,7 @@ class IngestAgent:
         pool.wait_for_completion()
         return primary_submission_envelopes
 
+    # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
     def _append_to_input_list_if_project_present_for_envelope(self, envelope, primary_submission_envelopes):
         submission_id = self.get_submission_id_from_envelope(envelope)
         project = self.get_project(submission_id)
