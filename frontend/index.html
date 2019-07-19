@@ -1,5 +1,5 @@
 <h3>Human Cell Atlas Internal Data Tracker</h3>
-<p>Data is refreshed every 3 hours. Please report issues or suggestions in <a target='_blank' href='https://github.com/HumanCellAtlas/data-monitoring-dashboard/issues'>github</a></p>
+<p>Data refreshed every 3 hours</p>
 <html style="padding:5px;">
 <link rel="stylesheet" href="tracker.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/css/foundation.min.css">
@@ -7,12 +7,12 @@
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <div class="lds-ring"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-<table border="1" id="tracker" class="display hover" width=100% style="display:none">
+<table id="tracker" class="display hover" style="display:none">
         <thead>
             <tr>
                 <th colspan="6">Project Info</th>
                 <th colspan="4">Primary Data</th>
-                <th colspan="6">Analysis Data</th>
+                <th colspan="7">Analysis Data</th>
             </tr>
             <tr>
                 <th>Project Title</th>
@@ -25,7 +25,8 @@
                 <th>Ingest Primary Bundles Exported</th>
                 <th>DSS Primary Bundles</th>
                 <th>Azul Primary Bundles</th>
-                <th>Analysis Workflows</th>
+                <th>Analysis Workflows By Status</th>
+                <th>Analysis Workflows By Pipeline Version</th>
                 <th>DSS Analysis Bundles</th>
                 <th>Azul Analysis Bundles</th>
                 <th>Matrix Analysis Bundles</th>
@@ -45,7 +46,8 @@
                 <th>Ingest Primary Bundles Exported</th>
                 <th>DSS Primary Bundles</th>
                 <th>Azul Primary Bundles</th>
-                <th>Analysis Workflows</th>
+                <th>Analysis Workflows By Status</th>
+                <th>Analysis Workflows By Pipeline Version</th>
                 <th>DSS Analysis Bundles</th>
                 <th>Azul Analysis Bundles</th>
                 <th>Matrix Analysis Bundles</th>
@@ -54,7 +56,7 @@
             </tr>
         </tfoot>
     </table>
-
+<p id='github_link' style="display:none">Please report issues or suggestions in <a target='_blank' href='https://github.com/HumanCellAtlas/data-monitoring-dashboard/issues'>github</a></p>
 <script>
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1)
@@ -120,27 +122,34 @@ $(document).ready(function() {
             dssPrimaryBundleCountDisplay = convert_to_green_div(small(dssPrimaryBundleCountDisplay))
         }
 
-        var project_workflows_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}'
-        var project_and_status_wfs_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}%26status%3D{WORKFLOW_STATUS}'
+        var project_workflows_job_manager_link_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}'
+        var project_and_status_job_manager_link_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}%26status%3D{WORKFLOW_STATUS}'
+        var project_and_version_job_manager_link_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}%26workflow-version%3D{WORKFLOW_VERSION}'
         analysis_info = val['dcp-data-dashboard-analysis-info-prod']
-        var workflowLink = project_workflows_template.replace('{PROJECT_UUID}', projectUUID)
-        var workflowStatsDisplay = '<a href="' + workflowLink + '"target="_blank">' + 'Total: ' + analysis_info['total_workflows'] + '</a>' + '<br>'
+        var workflowLink = project_workflows_job_manager_link_template.replace('{PROJECT_UUID}', projectUUID)
+        var workflowStatsByStatusDisplay = '<a href="' + workflowLink + '"target="_blank">' + 'Total: ' + analysis_info['total_workflows'] + '</a>' + '<br>'
+        var workflowStatsByVersionDisplay = '<a href="' + workflowLink + '"target="_blank">' + 'Total: ' + analysis_info['total_workflows'] + '</a>' + '<br>'
         $.each(analysis_info, function( key, val ) {
             if(key.includes('_workflows') && key != 'total_workflows'){
                 var workflowStatus = key.split('_workflows')[0].capitalize()
-                var workflowLink = project_and_status_wfs_template.replace('{PROJECT_UUID}', projectUUID).replace('{WORKFLOW_STATUS}', workflowStatus)
+                var workflowLink = project_and_status_job_manager_link_template.replace('{PROJECT_UUID}', projectUUID).replace('{WORKFLOW_STATUS}', workflowStatus)
                 var worfklowStatusMessage = '<a href="' + workflowLink + '"target="_blank">' + workflowStatus + ': ' + val + '</a>'
-                workflowStatsDisplay = workflowStatsDisplay + worfklowStatusMessage + '<br>'
+                workflowStatsByStatusDisplay = workflowStatsByStatusDisplay + worfklowStatusMessage + '<br>'
+            }
+            else if(key != 'total_workflows' && key != 'updated_at' && key != 'project_uuid'){
+                var workflowLink = project_and_version_job_manager_link_template.replace('{PROJECT_UUID}', projectUUID).replace('{WORKFLOW_VERSION}', key)
+                var worfklowVersionMessage = '<a href="' + workflowLink + '"target="_blank">' + key + ': ' + val + '</a>'
+                workflowStatsByVersionDisplay = workflowStatsByVersionDisplay + worfklowVersionMessage + '<br>'
             }
         })
         if(parseInt(analysis_info['total_workflows']) > 0 && parseInt(analysis_info['succeeded_workflows']) < dssGcpPrimaryBundleCount) {
-            workflowStatsDisplay = convert_to_red_div(small(workflowStatsDisplay))
+            workflowStatsByStatusDisplay = convert_to_red_div(small(workflowStatsByStatusDisplay))
         }
         else if (parseInt(analysis_info['total_workflows']) > 0 && analysis_info['succeeded_workflows'] == undefined){
-            workflowStatsDisplay = convert_to_red_div(small(workflowStatsDisplay))
+            workflowStatsByStatusDisplay = convert_to_red_div(small(workflowStatsByStatusDisplay))
         }
         else{
-            workflowStatsDisplay = convert_to_green_div(small(workflowStatsDisplay))
+            workflowStatsByStatusDisplay = convert_to_green_div(small(workflowStatsByStatusDisplay))
         }
 
         if (parseInt(analysis_info['total_workflows']) > 0 && analysis_info['succeeded_workflows'] == undefined){
@@ -182,7 +191,6 @@ $(document).ready(function() {
             matrixAnalysisBundleCountDisplay = convert_to_green_div(small(matrixAnalysisBundleCount))
             matrixCellCountDisplay = convert_to_green_div(small(matrixCellCount))
         }
-        
         var project = [
             convert_to_green_div(projectTitle), 
             convert_to_green_div(small(submissionDate)),
@@ -194,7 +202,8 @@ $(document).ready(function() {
             ingestPrimaryBundleCountDisplay,
             dssPrimaryBundleCountDisplay,
             azulPrimaryBundleCountDisplay,
-            workflowStatsDisplay,
+            workflowStatsByStatusDisplay,
+            convert_to_green_div(small(workflowStatsByVersionDisplay)),
             dssAnalysisBundleCountDisplay,
             azulAnalysisBundleCountDisplay,
             matrixAnalysisBundleCountDisplay,
@@ -222,19 +231,14 @@ $(document).ready(function() {
         });
       $('#tracker').DataTable({
         paging: false,
-        iDisplayLength: 25,
         data: dataSet,
         order: [[ 1, "desc" ]],
         columnDefs: [
             {
-                targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
-                className: 'dt-left'
+               targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+               className: 'dt-left'
             },
-            {
-                targets: [1, 2, 8],
-                className: 'dt-nowrap'
-            },
-            { type: 'num-html', targets: [5, 7, 10, 11, 12] }
+            { type: 'num-html', targets: [7, 9, 13, 14, 15] }
         ],
         drawCallback: function( settings ) {
             $('.red').parent('.dt-left').css('background', '#f5dad6');
@@ -248,7 +252,9 @@ $(document).ready(function() {
       $('input').css("width", "300px");
       $('.lds-ring').hide();
       $('#tracker').show();
+      $('#github_link').show();
     });
 })
 </script>
+
 </html>

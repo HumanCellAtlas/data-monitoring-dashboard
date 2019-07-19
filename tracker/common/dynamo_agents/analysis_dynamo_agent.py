@@ -16,16 +16,22 @@ class AnalysisDynamoAgent(DynamoAgent):
     def create_and_save_dynamo_payload(self, project_uuid):
         print(f"creating analysis info payload for {project_uuid}")
         workflows = self.analysis_agent.get_workflows_for_project_uuid(project_uuid)
-        workflows_by_status = self._separate_workflows_by_status(workflows)
+        workflow_count_by_status, workflow_count_by_version = self._count_workflows_by_status_and_version(workflows)
         payload = {}
         payload['project_uuid'] = project_uuid
-        for k, v in workflows_by_status.items():
-            payload[k.lower()+'_workflows'] = len(v)
+        for status, wf_count in workflow_count_by_status.items():
+            payload[status.lower()+'_workflows'] = wf_count
+        for version, wf_count in workflow_count_by_version.items():
+            payload[version] = wf_count
         payload['total_workflows'] = len(workflows)
         self.write_item_to_dynamo(payload)
 
-    def _separate_workflows_by_status(self, workflows):
-        workflows_by_status = defaultdict(list)
+    def _count_workflows_by_status_and_version(self, workflows):
+        workflow_count_by_status = defaultdict(lambda: 0)
+        workflow_count_by_version = defaultdict(lambda: 0)
         for workflow in workflows:
-            workflows_by_status[workflow['status']].append(workflow)
-        return workflows_by_status
+            wf_status = workflow['status']
+            wf_version = workflow['labels']['workflow-version']
+            workflow_count_by_status[wf_status] = workflow_count_by_status[wf_status] + 1
+            workflow_count_by_version[wf_version] = workflow_count_by_version[wf_version] + 1
+        return workflow_count_by_status, workflow_count_by_version
