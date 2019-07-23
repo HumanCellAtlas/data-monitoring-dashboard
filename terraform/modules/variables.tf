@@ -25,3 +25,7 @@ variable "refresher_schedule_expression" {
 variable "data_refresher_image" {
   type = "string"
 }
+
+variable "cloudfront_id" {
+  type = "string"
+}

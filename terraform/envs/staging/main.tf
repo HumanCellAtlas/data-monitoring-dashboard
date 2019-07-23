@@ -2,18 +2,18 @@ terraform {
   required_version = "=0.11.11"
 
   backend "s3" {
-    bucket  = "org-humancellatlas-data-dashboard-prod-infra"
-    key     = "terraform/envs/prod/state.tfstate"
+    bucket  = "org-humancellatlas-data-tracker-infra"
+    key     = "terraform/envs/staging/state.tfstate"
     encrypt = true
     region  = "us-east-1"
-    profile = "hca-prod"
+    profile = "hca"
   }
 }
 
 provider "aws" {
   version = ">= 1.31"
   region = "us-east-1"
-  profile = "hca-prod"
+  profile = "hca"
 }
 
 data "aws_caller_identity" "current" {}

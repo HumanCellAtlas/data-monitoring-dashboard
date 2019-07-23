@@ -1,0 +1,38 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:*"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:861229788715:table/dcp-data-dashboard-ingest-info-staging",
+        "arn:aws:dynamodb:us-east-1:861229788715:table/dcp-data-dashboard-matrix-info-staging",
+        "arn:aws:dynamodb:us-east-1:861229788715:table/dcp-data-dashboard-azul-info-staging",
+        "arn:aws:dynamodb:us-east-1:861229788715:table/dcp-data-dashboard-dss-info-staging",
+        "arn:aws:dynamodb:us-east-1:861229788715:table/dcp-data-dashboard-analysis-info-staging"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:us-east-1:861229788715:secret:dcp/matrix/staging/*",
+        "arn:aws:secretsmanager:us-east-1:861229788715:secret:dcp/tracker/staging/*"
+      ]
+    }
+  ]
+}

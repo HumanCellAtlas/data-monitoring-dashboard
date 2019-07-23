@@ -10,6 +10,7 @@ class DSSDynamoAgent(DynamoAgent):
         super().__init__()
         deployment_stage = os.environ["DEPLOYMENT_STAGE"]
         self.dynamo_table_name = f"dcp-data-dashboard-dss-info-{deployment_stage}"
+        self.table_display_name = "dss-info"
         self.dss_agent = DSSAgent()
 
     def create_and_save_dynamo_payload(self, project_uuid):

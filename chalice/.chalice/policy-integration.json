@@ -24,15 +24,15 @@
       ]
     },
     {
-        "Effect": "Allow",
-        "Action": [
-          "secretsmanager:DescribeSecret",
-          "secretsmanager:GetSecretValue"
-        ],
-        "Resource": [
-          "arn:aws:secretsmanager:us-east-1:861229788715:secret:dcp/matrix/integration/*",
-          "arn:aws:secretsmanager:us-east-1:861229788715:secret:dcp/tracker/integration/*"
-        ]
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:us-east-1:861229788715:secret:dcp/matrix/integration/*",
+        "arn:aws:secretsmanager:us-east-1:861229788715:secret:dcp/tracker/integration/*"
+      ]
     }
   ]
 }

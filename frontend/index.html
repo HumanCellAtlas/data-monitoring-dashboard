@@ -1,4 +1,4 @@
-<h3>Human Cell Atlas Internal Data Tracker</h3>
+<h3>HCA DCP Internal Tracker</h3>
 <p>Data refreshed every 3 hours</p>
 <html style="padding:5px;">
 <link rel="stylesheet" href="tracker.css">
@@ -75,12 +75,18 @@ var convert_to_green_div = function(str){
 }
 
 $(document).ready(function() {
+    var getTrackerApiUrl = function(){
+        var currentUrl = window.location.href;
+        apiUrl = currentUrl.replace('tracker', 'tracker-api')
+        return apiUrl
+    }
     var dataSet = []
-    $.getJSON( "https://n57ek0cuh9.execute-api.us-east-1.amazonaws.com/prod/v0/projects", function( data ) {
-      $.each( data, function( key, val ) {
+    projectsApiEndpoint = getTrackerApiUrl() + 'v0/projects'
+    $.getJSON(projectsApiEndpoint, function(data) {
+      $.each( data, function(key, val) {
         var projectUUID = key
         
-        ingest_info = val['dcp-data-dashboard-ingest-info-prod']
+        ingest_info = val['ingest-info']
         var lastUpdatedAt = new Date(ingest_info['updated_at']).toLocaleString()
         var submissionDate = new Date(ingest_info['submission_date']).toISOString().substring(0, 10);
         var projectTitle = '<b>' + ingest_info['project_title'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt
@@ -108,7 +114,7 @@ $(document).ready(function() {
             ingestPrimaryBundleCountDisplay = convert_to_green_div(small(ingestPrimaryBundleCount))
         }
 
-        dss_info = val['dcp-data-dashboard-dss-info-prod']
+        dss_info = val['dss-info']
         var dssAwsPrimaryBundleCount = dss_info['aws_primary_bundle_count']
         var dssAwsAnalysisBundleCount = dss_info['aws_analysis_bundle_count']
         var dssGcpPrimaryBundleCount = dss_info['gcp_primary_bundle_count']
@@ -125,7 +131,7 @@ $(document).ready(function() {
         var project_workflows_job_manager_link_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}'
         var project_and_status_job_manager_link_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}%26status%3D{WORKFLOW_STATUS}'
         var project_and_version_job_manager_link_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}%26workflow-version%3D{WORKFLOW_VERSION}'
-        analysis_info = val['dcp-data-dashboard-analysis-info-prod']
+        analysis_info = val['analysis-info']
         var workflowLink = project_workflows_job_manager_link_template.replace('{PROJECT_UUID}', projectUUID)
         var workflowStatsByStatusDisplay = '<a href="' + workflowLink + '"target="_blank">' + 'Total: ' + analysis_info['total_workflows'] + '</a>' + '<br>'
         var workflowStatsByVersionDisplay = '<a href="' + workflowLink + '"target="_blank">' + 'Total: ' + analysis_info['total_workflows'] + '</a>' + '<br>'
@@ -162,7 +168,7 @@ $(document).ready(function() {
             dssAnalysisBundleCountDisplay = convert_to_green_div(small(dssAnalysisBundleCountDisplay))
         }
 
-        azul_info = val['dcp-data-dashboard-azul-info-prod']
+        azul_info = val['azul-info']
         var azulPrimaryBundleCount = azul_info['primary_bundle_count']
         var azulAnalysisBundleCount = azul_info['analysis_bundle_count']
         // var azulCellCount = "5"
@@ -179,7 +185,7 @@ $(document).ready(function() {
             azulAnalysisBundleCountDisplay = convert_to_green_div(small(azulAnalysisBundleCount))
         }
 
-        matrix_info = val['dcp-data-dashboard-matrix-info-prod']
+        matrix_info = val['matrix-info']
         var matrixAnalysisBundleCount = matrix_info['analysis_bundle_count']
         var matrixCellCount = matrix_info['cell_count']
 

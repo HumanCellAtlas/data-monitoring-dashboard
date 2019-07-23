@@ -10,6 +10,22 @@
         "API_HOST": "tracker.prod.data.humancellatlas.org",
         "XDG_CONFIG_HOME": "/tmp/.config"
       }
+    },
+    "integration": {
+      "api_gateway_stage": "integration",
+      "environment_variables": {
+        "DEPLOYMENT_STAGE": "integration",
+        "API_HOST": "tracker.integration.data.humancellatlas.org",
+        "XDG_CONFIG_HOME": "/tmp/.config"
+      }
+    },
+    "staging": {
+      "api_gateway_stage": "staging",
+      "environment_variables": {
+        "DEPLOYMENT_STAGE": "staging",
+        "API_HOST": "tracker.staging.data.humancellatlas.org",
+        "XDG_CONFIG_HOME": "/tmp/.config"
+      }
     }
   },
   "lambda_timeout": 300,

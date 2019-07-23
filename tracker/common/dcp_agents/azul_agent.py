@@ -1,3 +1,4 @@
+import json
 import os
 
 from urllib3 import Retry
@@ -21,15 +22,13 @@ class AzulAgent:
         self.https_session.mount('https://', azul_adapter)
 
     def get_entities_by_project(self, entity_type, project_uuid):
-        filters = {'file': {'projectId': {'is': [project_uuid]}}}
+        filters = {'projectId': {'is': [project_uuid]}}
         entities = []
         size = 100
-        # Yes, the value of the filters parameter is a Python literal, not JSON.
-        # https://github.com/DataBiosphere/azul/issues/537
-        params = dict(filters=str(filters), size=str(size))
+        params = dict(filters=json.dumps(filters), size=str(size))
         while True:
-            url = self.azul_url + f'/repository/{entity_type}?' + urlencode(params, safe="{}/'")
-            response = self.https_session.request('GET', url)
+            url = self.azul_url + f'/repository/{entity_type}'
+            response = self.https_session.request('GET', url, params=params)
             response.raise_for_status()
             body = response.json()
             hits = body['hits']
