@@ -9,8 +9,9 @@ DYNAMO = boto3.resource("dynamodb", region_name=os.environ['AWS_DEFAULT_REGION']
 class DynamoAgent:
 
     def __init__(self):
-        # Dynamo table name set by child class
+        # Variables set by child class
         self.dynamo_table_name = None
+        self.table_display_name = None
 
     def write_item_to_dynamo(self, payload):
         print(f"saving payload {payload} to {self.dynamo_table_name}")
@@ -34,7 +35,7 @@ class DynamoAgent:
         results = table.scan()
         if table.item_count > len(results['Items']):
             raise Exception(f"Table scan for {self.dynamo_table_name} did not retrieve complete results")
-        payload = {'records': results['Items'], 'table_name': self.dynamo_table_name}
+        payload = {'records': results['Items'], 'table_name': self.table_display_name}
         return payload
 
     def create_dynamo_payload(self, submission_id):

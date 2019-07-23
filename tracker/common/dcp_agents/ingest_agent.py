@@ -3,17 +3,21 @@ import os
 import requests
 from hca.util.pool import ThreadPool
 
+
+DEPLOYMENT_STAGE = os.environ['DEPLOYMENT_STAGE']
 STATUSES_TO_EXCLUDE_FROM_TRACKER = ['Invalid', 'Draft', 'Valid', 'Pending', 'Validating', 'Submitted']
 PROJECT_NAME_STRINGS_TO_EXCLUDE_FROM_TRACKER = [
-    'prod/optimus/',
-    'prod/Smart-seq2/',
-    'prod/10x/',
+    f'{DEPLOYMENT_STAGE}/optimus/',
+    f'{DEPLOYMENT_STAGE}/Smart-seq2/',
+    f'{DEPLOYMENT_STAGE}/10x/',
+    'integration/10x/',
+    'integration/Smart-seq2',
     'SS2 1 Cell Integration Test',
-    'ss2_prod_test_',
-    '10x_prod_test_',
+    f'ss2_{DEPLOYMENT_STAGE}_test_',
+    f'10x_{DEPLOYMENT_STAGE}_test_',
     'DCP_Infrastructure_Test_Do_Not_Use',
     'Q4_DEMO-project',
-    'Glioblastoma_small',
+    'Glioblastoma_small'
 ]
 
 
@@ -23,11 +27,10 @@ class IngestAgent:
     INGEST_API_PROD_URL = "https://api.ingest.data.humancellatlas.org"
 
     def __init__(self):
-        self.deployment = os.environ["DEPLOYMENT_STAGE"]
-        if self.deployment == "prod":
+        if DEPLOYMENT_STAGE == "prod":
             self.base_url = self.INGEST_API_PROD_URL
         else:
-            self.base_url = self.INGEST_API_URL_TEMPLATE.format(self.deployment)
+            self.base_url = self.INGEST_API_URL_TEMPLATE.format(DEPLOYMENT_STAGE)
 
     def get_envelope(self, submission_id):
         url = f"{self.base_url}/submissionEnvelopes/{submission_id}"

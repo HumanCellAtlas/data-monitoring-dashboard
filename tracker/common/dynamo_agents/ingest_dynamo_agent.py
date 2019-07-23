@@ -10,6 +10,7 @@ class IngestDynamoAgent(DynamoAgent):
         super().__init__()
         deployment_stage = os.environ["DEPLOYMENT_STAGE"]
         self.dynamo_table_name = f"dcp-data-dashboard-ingest-info-{deployment_stage}"
+        self.table_display_name = "ingest-info"
         self.ingest_agent = IngestAgent()
 
     def create_and_save_dynamo_payload(self, submission_id):
