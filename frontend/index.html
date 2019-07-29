@@ -75,10 +75,15 @@ var convert_to_green_div = function(str){
 }
 
 $(document).ready(function() {
+    var currentUrl = location.protocol + '//' + location.host + location.pathname
     var getTrackerApiUrl = function(){
-        var currentUrl = window.location.href;
         apiUrl = currentUrl.replace('tracker', 'tracker-api')
         return apiUrl
+    }
+
+    var getProjectTrackerUrl = function(projectUUID){
+        projectTrackerUrl = currentUrl + '?projectUUID=' + projectUUID
+        return projectTrackerUrl
     }
     var dataSet = []
     projectsApiEndpoint = getTrackerApiUrl() + 'v0/projects'
@@ -95,7 +100,8 @@ $(document).ready(function() {
         // PROJECT INFO DISPLAY
         var lastUpdatedAt = new Date(azul_info['updated_at']).toLocaleString()
         var submissionDate = new Date(ingest_info['submission_date']).toISOString().substring(0, 10);
-        var projectTitle = '<b>' + ingest_info['project_title'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt
+        var projectLinkButton = "<button data-id='" + projectUUID + "' class='copy-button'>Shareable link</button>"
+        var projectTitle = '<b>' + ingest_info['project_title'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt + projectLinkButton
         var projectShortName = '<b>' + ingest_info['project_short_name'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt
         var submissionId = ingest_info['submission_id']
         var species = ingest_info['species']
@@ -232,21 +238,34 @@ $(document).ready(function() {
             dataSet.push(project);
         }
       });
-        jQuery.extend( jQuery.fn.dataTableExt.oSort, {
-            "num-html-pre": function ( a ) {
-                var x = String(a).replace( /<[\s\S]*?>/g, "" );
-                return parseFloat( x );
-            },
-         
-            "num-html-asc": function ( a, b ) {
-                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
-            },
-         
-            "num-html-desc": function ( a, b ) {
-                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
-            }
+      jQuery.extend( jQuery.fn.dataTableExt.oSort, {
+        "num-html-pre": function ( a ) {
+            var x = String(a).replace( /<[\s\S]*?>/g, "" );
+            return parseFloat( x );
+        },
+        "num-html-asc": function ( a, b ) {
+            return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+        },
+        "num-html-desc": function ( a, b ) {
+            return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+        }
+      });
+      function getUrlVars() {
+        var vars = {};
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+          vars[key] = value;
         });
+        return vars;
+      }
+      function getUrlParam(parameter, defaultvalue){
+        var urlparameter = defaultvalue;
+        if(window.location.href.indexOf(parameter) > -1){
+          urlparameter = getUrlVars()[parameter];
+        }
+        return urlparameter;
+      }
       $('#tracker').DataTable({
+        oSearch: {"sSearch": getUrlParam('projectUUID', '')},
         paging: false,
         data: dataSet,
         order: [[ 1, "desc" ]],
@@ -260,6 +279,11 @@ $(document).ready(function() {
         drawCallback: function( settings ) {
             $('.red').parent('.dt-left').css('background', '#f5dad6');
             $('.red').parent('.dt-left').prop('title', 'Unexpected value found. Further Investigation required');
+            $('.copy-button').on('click', function () {
+                var projectUUID = $(this).data('id')
+                projectTrackerUrl = getProjectTrackerUrl(projectUUID)
+                alert("Copy this url: " + projectTrackerUrl);
+            });
         }
       });
       $('#tracker_filter').css("color", "#b92525");
