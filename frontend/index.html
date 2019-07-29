@@ -101,7 +101,7 @@ $(document).ready(function() {
         var lastUpdatedAt = new Date(azul_info['updated_at']).toLocaleString()
         var submissionDate = new Date(ingest_info['submission_date']).toISOString().substring(0, 10);
         var projectLinkButton = "<button data-id='" + projectUUID + "' class='copy-button'>Shareable link</button>"
-        var projectTitle = '<b>' + ingest_info['project_title'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt + projectLinkButton
+        var projectTitle = '<b>' + ingest_info['project_title'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt + '<br>' + projectLinkButton
         var projectShortName = '<b>' + ingest_info['project_short_name'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt
         var submissionId = ingest_info['submission_id']
         var species = ingest_info['species']
