@@ -87,18 +87,26 @@ $(document).ready(function() {
         var projectUUID = key
         
         ingest_info = val['ingest-info']
-        var lastUpdatedAt = new Date(ingest_info['updated_at']).toLocaleString()
+        azul_info = val['azul-info']
+        dss_info = val['dss-info']
+        matrix_info = val['matrix-info']
+        analysis_info = val['analysis-info']
+
+        // PROJECT INFO DISPLAY
+        var lastUpdatedAt = new Date(azul_info['updated_at']).toLocaleString()
         var submissionDate = new Date(ingest_info['submission_date']).toISOString().substring(0, 10);
         var projectTitle = '<b>' + ingest_info['project_title'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt
         var projectShortName = '<b>' + ingest_info['project_short_name'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt
         var submissionId = ingest_info['submission_id']
         var species = ingest_info['species']
         var methods = ingest_info['library_construction_methods']
+
+        // PRIMARY INFO DISPLAY
         var submissionStatus = ingest_info['submission_status']
         if(submissionStatus != 'Complete'){
             submissionStatus = convert_to_red_div(small(submissionStatus))
         }
-        else{
+        else {
             submissionStatus = convert_to_green_div(small(submissionStatus))
         }
         var ingestPrimaryBundleCount = ingest_info['submission_bundles_exported_count']
@@ -110,11 +118,10 @@ $(document).ready(function() {
         if(parseInt(ingestPrimaryBundleCount) == 0){
             ingestPrimaryBundleCountDisplay = convert_to_red_div(small(ingestPrimaryBundleCount))
         }
-        else{
+        else {
             ingestPrimaryBundleCountDisplay = convert_to_green_div(small(ingestPrimaryBundleCount))
         }
 
-        dss_info = val['dss-info']
         var dssAwsPrimaryBundleCount = dss_info['aws_primary_bundle_count']
         var dssAwsAnalysisBundleCount = dss_info['aws_analysis_bundle_count']
         var dssGcpPrimaryBundleCount = dss_info['gcp_primary_bundle_count']
@@ -124,14 +131,14 @@ $(document).ready(function() {
         if(parseInt(dssAwsPrimaryBundleCount) != parseInt(ingestPrimaryBundleCount) || parseInt(dssGcpPrimaryBundleCount) != parseInt(ingestPrimaryBundleCount)){
             dssPrimaryBundleCountDisplay = convert_to_red_div(small(dssPrimaryBundleCountDisplay))
         }
-        else{
+        else {
             dssPrimaryBundleCountDisplay = convert_to_green_div(small(dssPrimaryBundleCountDisplay))
         }
 
+        // ANALYSIS INFO DISPLAY
         var project_workflows_job_manager_link_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}'
         var project_and_status_job_manager_link_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}%26status%3D{WORKFLOW_STATUS}'
         var project_and_version_job_manager_link_template = 'https://job-manager.caas-prod.broadinstitute.org/jobs?q=project_uuid%3D{PROJECT_UUID}%26workflow-version%3D{WORKFLOW_VERSION}'
-        analysis_info = val['analysis-info']
         var workflowLink = project_workflows_job_manager_link_template.replace('{PROJECT_UUID}', projectUUID)
         var workflowStatsByStatusDisplay = '<a href="' + workflowLink + '"target="_blank">' + 'Total: ' + analysis_info['total_workflows'] + '</a>' + '<br>'
         var workflowStatsByVersionDisplay = '<a href="' + workflowLink + '"target="_blank">' + 'Total: ' + analysis_info['total_workflows'] + '</a>' + '<br>'
@@ -154,34 +161,37 @@ $(document).ready(function() {
         else if (parseInt(analysis_info['total_workflows']) > 0 && analysis_info['succeeded_workflows'] == undefined){
             workflowStatsByStatusDisplay = convert_to_red_div(small(workflowStatsByStatusDisplay))
         }
-        else{
+        else {
             workflowStatsByStatusDisplay = convert_to_green_div(small(workflowStatsByStatusDisplay))
         }
 
-        if (parseInt(analysis_info['total_workflows']) > 0 && analysis_info['succeeded_workflows'] == undefined){
-            dssAnalysisBundleCountDisplay = convert_to_green_div(small(dssAnalysisBundleCountDisplay))
+        if (parseInt(analysis_info['total_workflows']) > 0 && analysis_info['succeeded_workflows'] != undefined){
+            if(parseInt(dssAwsAnalysisBundleCount) != parseInt(dssGcpPrimaryBundleCount)){
+                dssAnalysisBundleCountDisplay = convert_to_red_div(small(dssAnalysisBundleCountDisplay))
+            }
+            else if(parseInt(dssAwsAnalysisBundleCount) != parseInt(dssGcpAnalysisBundleCount)){
+                dssAnalysisBundleCountDisplay = convert_to_red_div(small(dssAnalysisBundleCountDisplay))
+            }
+            else {
+                dssAnalysisBundleCountDisplay = convert_to_green_div(small(dssAnalysisBundleCountDisplay))
+            }
         }
-        else if(parseInt(analysis_info['total_workflows']) > 0 && (parseInt(dssGcpAnalysisBundleCount) != parseInt(analysis_info['succeeded_workflows']) || parseInt(dssAwsAnalysisBundleCount) != parseInt(analysis_info['succeeded_workflows'])) && (parseInt(dssGcpAnalysisBundleCount) != parseInt(dssGcpPrimaryBundleCount) || parseInt(dssAwsAnalysisBundleCount) != parseInt(dssGcpPrimaryBundleCount))){
-            dssAnalysisBundleCountDisplay = convert_to_red_div(small(dssAnalysisBundleCountDisplay))
-        }
-        else{
+        else {
             dssAnalysisBundleCountDisplay = convert_to_green_div(small(dssAnalysisBundleCountDisplay))
         }
 
-        azul_info = val['azul-info']
         var azulPrimaryBundleCount = azul_info['primary_bundle_count']
         var azulAnalysisBundleCount = azul_info['analysis_bundle_count']
-        // var azulCellCount = "5"
         if(parseInt(azulPrimaryBundleCount) != parseInt(dssAwsPrimaryBundleCount)){
             azulPrimaryBundleCountDisplay = convert_to_red_div(small(azulPrimaryBundleCount))
         }
-        else{
+        else {
             azulPrimaryBundleCountDisplay = convert_to_green_div(small(azulPrimaryBundleCount))
         }
         if(parseInt(azulAnalysisBundleCount) != parseInt(dssAwsAnalysisBundleCount)){
             azulAnalysisBundleCountDisplay = convert_to_red_div(small(azulAnalysisBundleCount))
         }
-        else{
+        else {
             azulAnalysisBundleCountDisplay = convert_to_green_div(small(azulAnalysisBundleCount))
         }
 
@@ -197,6 +207,7 @@ $(document).ready(function() {
             matrixAnalysisBundleCountDisplay = convert_to_green_div(small(matrixAnalysisBundleCount))
             matrixCellCountDisplay = convert_to_green_div(small(matrixCellCount))
         }
+
         var project = [
             convert_to_green_div(projectTitle), 
             convert_to_green_div(small(submissionDate)),
