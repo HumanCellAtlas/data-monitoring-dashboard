@@ -101,9 +101,9 @@ $(document).ready(function() {
         var lastUpdatedAt = new Date(azul_info['updated_at']).toLocaleString()
         var submissionDate = new Date(ingest_info['submission_date']).toISOString().substring(0, 10);
         var projectLinkButton = "<button data-id='" + projectUUID + "' class='copy-button'>Shareable link</button>"
-        var primaryInvestigatorDisplay = 'PI: ' + ingest_info['primary_investigator']
-        var dataWranglerDisplay = 'Wrangler: ' + ingest_info['data_curator']
-        var projectTitle = '<b>' + ingest_info['project_title'] + '</b><br>' + small(primaryInvestigatorDisplay) + '<br>' + small(dataWranglerDisplay) + '<br>' + small(projectLinkButton)
+        var primaryInvestigatorDisplay = '<br><b>PIs: </b>' + ingest_info['primary_investigator']
+        var dataWranglerDisplay = '<b>Wranglers: </b>' + ingest_info['data_curator']
+        var projectTitle = '<b>' + ingest_info['project_title'] + '</b><br>' + small(projectLinkButton) + '<br>' + small(primaryInvestigatorDisplay) + '<br>' + small(dataWranglerDisplay)
         var projectShortName = '<b>' + ingest_info['project_short_name'] + '</b><br><small>Stats refreshed at: ' + lastUpdatedAt + '</small>'
         var submissionId = ingest_info['submission_id']
         var species = ingest_info['species']

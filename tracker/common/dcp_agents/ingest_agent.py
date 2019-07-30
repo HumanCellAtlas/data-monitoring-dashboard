@@ -184,8 +184,8 @@ class IngestAgent:
 
     # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
     def get_primary_investigator_and_data_curator_from_project(self, project):
-        primary_investigator = None
-        data_curator = None
+        primary_investigator = ''
+        data_curator = ''
         contributors = project['content']['contributors']
         for contributor in contributors:
             project_role = contributor.get('project_role')
@@ -199,9 +199,13 @@ class IngestAgent:
                 else:
                     role_ontology_label = project_role.get('ontology_label')
                 if role_ontology_label == "principal investigator":
-                    primary_investigator = name
+                    primary_investigator += f"{name}; "
                 elif role_ontology_label == "data curator" or role_ontology_label == "Human Cell Atlas wrangler":
-                    data_curator = name
+                    data_curator += f"{name}; "
+        if primary_investigator == '':
+            primary_investigator = 'N/A'
+        if data_curator == '':
+            data_curator = 'N/A'
         return primary_investigator, data_curator
 
     # TODO Does not belong in ingest agent/dcplib. Move to ingest utils and write test.
