@@ -19,7 +19,7 @@ def track_envelope_data_moving_through_dcp(submission_id, failures={}):
     try:
         project_uuid = ingest_dynamo_agent.create_and_save_dynamo_payload(submission_id)
         dss_dynamo_agent.create_and_save_dynamo_payload(project_uuid)
-        analysis_dynamo_agent.create_and_save_dynamo_payload(project_uuid)
+        analysis_dynamo_agent.create_and_save_dynamo_payload(submission_id, project_uuid)
         matrix_dynamo_agent.create_and_save_dynamo_payload(project_uuid)
         azul_dynamo_agent.create_and_save_dynamo_payload(project_uuid)
     except Exception as e:
