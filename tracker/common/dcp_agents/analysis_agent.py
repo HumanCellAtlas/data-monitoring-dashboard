@@ -18,6 +18,7 @@ class AnalysisAgent:
         self.auth = cromwell_tools.cromwell_auth.CromwellAuth.harmonize_credentials(service_account_key=self.analysis_gcp_creds,
                                                                                     url=self.cromwell_url)
 
+    # TODO FIGURE OUT HOW TO PASS IN CREDS ONCE THIS AGENT IS MOVED TO DCPLIB
     @property
     def analysis_gcp_creds(self):
         return json.loads(base64.b64decode(TrackerInfraConfig().analysis_gcp_creds).decode())
