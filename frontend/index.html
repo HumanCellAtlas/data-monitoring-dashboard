@@ -163,10 +163,7 @@ $(document).ready(function() {
                 workflowStatsByVersionDisplay = workflowStatsByVersionDisplay + worfklowVersionMessage + '<br>'
             }
         })
-        if(parseInt(analysis_info['total_workflows']) > 0 && parseInt(analysis_info['succeeded_workflows']) < dssGcpPrimaryBundleCount) {
-            workflowStatsByStatusDisplay = convert_to_red_div(small(workflowStatsByStatusDisplay))
-        }
-        else if (parseInt(analysis_info['total_workflows']) > 0 && analysis_info['succeeded_workflows'] == undefined){
+        if (analysis_info['workflows_expected'] == true && (analysis_info['succeeded_workflows'] < dssGcpPrimaryBundleCount || analysis_info['succeeded_workflows'] == undefined)){
             workflowStatsByStatusDisplay = convert_to_red_div(small(workflowStatsByStatusDisplay))
         }
         else {
