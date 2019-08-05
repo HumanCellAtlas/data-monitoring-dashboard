@@ -5,7 +5,7 @@ from tracker.common.dcp_agents.analysis_agent import AnalysisAgent
 from tracker.common.dynamo_agents.dynamo_agent import DynamoAgent
 from tracker.common.dynamo_agents.ingest_dynamo_agent import IngestDynamoAgent
 
-METHODS_SUPPORTED_FOR_WORKFLOWS = ["10X 3' v2 sequencing", "10X v2 sequencing", "Smart-Seq"]
+METHODS_SUPPORTED_FOR_WORKFLOWS = ["10X 3' v2 sequencing", "10X v2 sequencing", "Smart-seq2"]
 
 
 class AnalysisDynamoAgent(DynamoAgent):

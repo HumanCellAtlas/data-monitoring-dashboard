@@ -157,7 +157,7 @@ $(document).ready(function() {
                 var worfklowStatusMessage = '<a href="' + workflowLink + '"target="_blank">' + workflowStatus + ': ' + val + '</a>'
                 workflowStatsByStatusDisplay = workflowStatsByStatusDisplay + worfklowStatusMessage + '<br>'
             }
-            else if(key != 'total_workflows' && key != 'updated_at' && key != 'project_uuid'){
+            else if(key != 'total_workflows' && key != 'workflows_expected' && key != 'updated_at' && key != 'project_uuid'){
                 var workflowLink = project_and_version_job_manager_link_template.replace('{PROJECT_UUID}', projectUUID).replace('{WORKFLOW_VERSION}', key)
                 var worfklowVersionMessage = '<a href="' + workflowLink + '"target="_blank">' + key + ': ' + val + '</a>'
                 workflowStatsByVersionDisplay = workflowStatsByVersionDisplay + worfklowVersionMessage + '<br>'
