@@ -2,7 +2,10 @@ include common.mk
 .PHONY: lint test unit-tests
 MODULES=tracker
 
-test: lint
+test: lint unit-tests
+
+unit-tests:
+	pytest -v --ignore tests/functional/
 
 lint:
 	flake8 $(MODULES) *.py

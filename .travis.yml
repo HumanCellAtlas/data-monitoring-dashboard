@@ -2,10 +2,17 @@ language: python
 
 python:
   - '3.6'
-
+addons:
+  apt:
+    packages:
+      - jq
+      - moreutils
+      - gettext
 install: "pip install -r requirements-dev.txt -r requirements.txt"
 
 jobs:
   include:
     - stage: Unit Test
-      script: pytest -v
+      script:
+        - source config/environment
+        - make test
