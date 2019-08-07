@@ -41,20 +41,20 @@ class TestAnalysisAgent(object):
         with pytest.raises(KeyError):
             agent = analysis_agent.AnalysisAgent()
             assert agent
-        
+
     def test_analysis_agent_can_resolve_the_right_collection_for_integration_deployment(self, monkeypatch, test_config):
         monkeypatch.setenv('DEPLOYMENT_STAGE', 'integration')
         monkeypatch.setattr(analysis_agent.AnalysisAgent, 'analysis_gcp_creds', test_config)
         agent = analysis_agent.AnalysisAgent()
         assert agent.cromwell_collection == 'lira-test'
-    
+
     def test_analysis_agent_can_resolve_the_right_collection_for_non_integration_deployments(self, monkeypatch, deployments, test_config):
         for deployment in deployments:
             monkeypatch.setenv('DEPLOYMENT_STAGE', deployment)
             monkeypatch.setattr(analysis_agent.AnalysisAgent, 'analysis_gcp_creds', test_config)
             agent = analysis_agent.AnalysisAgent()
             assert agent.cromwell_collection == f'lira-{deployment}'
-    
+
     def test_get_workflows_for_project_uuid_can_fetch_simple_workflow_results(self, monkeypatch, simple_workflow_response, test_config):
         monkeypatch.setenv('DEPLOYMENT_STAGE', 'integration')
         monkeypatch.setattr(analysis_agent.AnalysisAgent, 'analysis_gcp_creds', test_config)
@@ -65,7 +65,7 @@ class TestAnalysisAgent(object):
         agent = analysis_agent.AnalysisAgent()
         result = agent.get_workflows_for_project_uuid(project_uuid='fake-uuid', with_labels=False)
         assert len(result) == simple_workflow_response['totalResultsCount']
-    
+
     def test_get_workflows_for_project_uuid_can_fetch_complex_workflow_results(self, monkeypatch, complex_workflow_response, test_config):
         monkeypatch.setenv('DEPLOYMENT_STAGE', 'integration')
         monkeypatch.setattr(analysis_agent.AnalysisAgent, 'analysis_gcp_creds', test_config)
@@ -78,5 +78,3 @@ class TestAnalysisAgent(object):
         assert len(result) == complex_workflow_response['totalResultsCount']
         assert result[0].get('labels') is not None
         assert result[0].get('labels').get('project_uuid') == 'fake-uuid'
-
-

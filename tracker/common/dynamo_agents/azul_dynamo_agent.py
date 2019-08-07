@@ -13,7 +13,7 @@ class AzulDynamoAgent(DynamoAgent):
         self.table_display_name = "azul-info"
         self.azul_agent = AzulAgent()
 
-    def create_and_save_dynamo_payload(self, project_uuid):
+    def create_dynamo_payload(self, project_uuid):
         print(f"creating azul info payload for {project_uuid}")
         bundles = self.azul_agent.get_entities_by_project('bundles', project_uuid)
         primary_bundle_count = 0
@@ -28,4 +28,4 @@ class AzulDynamoAgent(DynamoAgent):
         payload['project_uuid'] = project_uuid
         payload['primary_bundle_count'] = primary_bundle_count
         payload['analysis_bundle_count'] = analysis_bundle_count
-        self.write_item_to_dynamo(payload)
+        return payload

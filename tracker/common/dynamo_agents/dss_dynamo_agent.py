@@ -13,7 +13,7 @@ class DSSDynamoAgent(DynamoAgent):
         self.table_display_name = "dss-info"
         self.dss_agent = DSSAgent()
 
-    def create_and_save_dynamo_payload(self, project_uuid):
+    def create_dynamo_payload(self, project_uuid):
         print(f"creating dss info payload for {project_uuid}")
         total_aws_bundle_count = self.dss_agent.total_bundle_count_for_project(project_uuid, 'aws')
         primary_aws_bundle_count = self.dss_agent.primary_bundle_count_for_project(project_uuid, 'aws')
@@ -27,4 +27,4 @@ class DSSDynamoAgent(DynamoAgent):
         payload['aws_analysis_bundle_count'] = analysis_aws_bundle_count
         payload['gcp_primary_bundle_count'] = primary_gcp_bundle_count
         payload['gcp_analysis_bundle_count'] = analysis_gcp_bundle_count
-        self.write_item_to_dynamo(payload)
+        return payload
