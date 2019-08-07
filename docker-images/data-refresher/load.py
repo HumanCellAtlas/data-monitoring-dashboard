@@ -17,11 +17,20 @@ azul_dynamo_agent = AzulDynamoAgent()
 
 def track_envelope_data_moving_through_dcp(submission_id, failures={}):
     try:
-        project_uuid = ingest_dynamo_agent.create_and_save_dynamo_payload(submission_id)
-        dss_dynamo_agent.create_and_save_dynamo_payload(project_uuid)
-        analysis_dynamo_agent.create_and_save_dynamo_payload(submission_id, project_uuid)
-        matrix_dynamo_agent.create_and_save_dynamo_payload(project_uuid)
-        azul_dynamo_agent.create_and_save_dynamo_payload(project_uuid)
+        # Create project payloads
+        ingest_submission_payload = ingest_dynamo_agent.create_dynamo_payload(submission_id)
+        project_uuid = ingest_submission_payload['project_uuid']
+        dss_project_payload = dss_dynamo_agent.create_dynamo_payload(project_uuid)
+        analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(submission_id, project_uuid)
+        matrix_project_payload = matrix_dynamo_agent.create_dynamo_payload(project_uuid)
+        azul_project_payload = azul_dynamo_agent.create_dynamo_payload(project_uuid)
+
+        # Save project payloads once all created
+        ingest_dynamo_agent.write_item_to_dynamo(ingest_submission_payload)
+        dss_dynamo_agent.write_item_to_dynamo(dss_project_payload)
+        analysis_dynamo_agent.write_item_to_dynamo(analysis_project_payload)
+        matrix_dynamo_agent.write_item_to_dynamo(matrix_project_payload)
+        azul_dynamo_agent.write_item_to_dynamo(azul_project_payload)
     except Exception as e:
         failures[submission_id] = e
         print(f"Submission_id {submission_id} failed with error: {e} ")

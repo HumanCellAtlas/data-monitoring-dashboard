@@ -13,7 +13,7 @@ class IngestDynamoAgent(DynamoAgent):
         self.table_display_name = "ingest-info"
         self.ingest_agent = IngestAgent()
 
-    def create_and_save_dynamo_payload(self, submission_id):
+    def create_dynamo_payload(self, submission_id):
         print(f"creating ingest info payload for {submission_id}")
         payload = {}
         envelope = self.ingest_agent.get_envelope(submission_id)
@@ -34,5 +34,4 @@ class IngestDynamoAgent(DynamoAgent):
         primary_investigator, data_curator = self.ingest_agent.get_primary_investigator_and_data_curator_from_project(project)
         payload['primary_investigator'] = primary_investigator
         payload['data_curator'] = data_curator
-        self.write_item_to_dynamo(payload)
-        return project_uuid
+        return payload

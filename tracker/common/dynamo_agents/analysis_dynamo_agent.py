@@ -18,7 +18,7 @@ class AnalysisDynamoAgent(DynamoAgent):
         self.analysis_agent = AnalysisAgent()
         self.ingest_dynamo_agent = IngestDynamoAgent()
 
-    def create_and_save_dynamo_payload(self, submission_id, project_uuid):
+    def create_dynamo_payload(self, submission_id, project_uuid):
         print(f"creating analysis info payload for {project_uuid}")
         workflows = self.analysis_agent.get_workflows_for_project_uuid(project_uuid)
         methods = self.ingest_dynamo_agent.get_item_from_dynamo('submission_id', submission_id)['library_construction_methods']
@@ -32,7 +32,7 @@ class AnalysisDynamoAgent(DynamoAgent):
             payload[version] = wf_count
         payload['total_workflows'] = len(workflows)
         payload['workflows_expected'] = workflows_expected
-        self.write_item_to_dynamo(payload)
+        return payload
 
     def _are_workflows_expected_for_project(self, project_methods):
         workflows_expected = False
