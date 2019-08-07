@@ -23,7 +23,9 @@ class MatrixAgent:
         return cell_count
 
     def get_bundle_count_for_project(self, project_uuid):
-        query = f"select count(*) from (select distinct(analysis.analysiskey) from analysis LEFT OUTER JOIN cell on analysis.analysiskey = cell.analysiskey where cell.projectkey = '{project_uuid}');"
+        query = f"select count(*) from (select distinct(analysis.analysiskey) \
+            from analysis LEFT OUTER JOIN cell on analysis.analysiskey = cell.analysiskey \
+            where cell.projectkey = '{project_uuid}');"
         results = self._run_query(query)
         bundle_count = results[0][0]
         return bundle_count

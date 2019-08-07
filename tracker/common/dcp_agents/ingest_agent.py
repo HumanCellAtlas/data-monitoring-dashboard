@@ -69,7 +69,7 @@ class IngestAgent:
             biomaterials_url = next_link['href']
         return biomaterials
 
-    #TODO consolidate logic in get_biomaterials and get_protocols
+    # TODO consolidate logic in get_biomaterials and get_protocols
     def get_protocols(self, submission_id):
         protocols = []
         envelope = self.get_envelope(submission_id)
@@ -138,10 +138,7 @@ class IngestAgent:
     def get_unique_species_set_from_biomaterials(self, biomaterials):
         project_species = set()
         for biomaterial in biomaterials:
-            try:
-                content = biomaterial['content']
-            except:
-                import pdb; pdb.set_trace()
+            content = biomaterial['content']
             if content.get('genus_species'):
                 genus_species = content['genus_species']
                 for species in genus_species:
@@ -215,7 +212,8 @@ class IngestAgent:
         for envelope in envelopes:
             submission_status = envelope['submissionState']
             if submission_status not in STATUSES_TO_EXCLUDE_FROM_TRACKER:
-                pool.add_task(self._append_to_input_list_if_project_present_for_envelope, envelope, primary_submission_envelopes)
+                pool.add_task(self._append_to_input_list_if_project_present_for_envelope,
+                              envelope, primary_submission_envelopes)
         pool.wait_for_completion()
         return primary_submission_envelopes
 

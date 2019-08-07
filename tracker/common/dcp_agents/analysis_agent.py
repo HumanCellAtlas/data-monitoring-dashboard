@@ -31,7 +31,6 @@ class AnalysisAgent:
             with_labels: Whether to include all workflow labels information in the result. Note
                 setting this to True will put some extra stress on the secondary analysis service
                 and might be slower to query.
-        
         Returns:
             result: A list of workflow metadata blocks that matched the query.
         """

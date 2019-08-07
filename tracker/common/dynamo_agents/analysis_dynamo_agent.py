@@ -27,7 +27,7 @@ class AnalysisDynamoAgent(DynamoAgent):
         payload = {}
         payload['project_uuid'] = project_uuid
         for status, wf_count in workflow_count_by_status.items():
-            payload[status.lower()+'_workflows'] = wf_count
+            payload[status.lower() + '_workflows'] = wf_count
         for version, wf_count in workflow_count_by_version.items():
             payload[version] = wf_count
         payload['total_workflows'] = len(workflows)
