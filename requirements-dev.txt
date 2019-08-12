@@ -2,3 +2,4 @@ chalice >= 1.1.1, < 1.2.0
 domovoi == 1.5.7
 flake8==3.5.0
 pytest==4.6.4
+-r requirements.txt
