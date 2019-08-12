@@ -1,7 +1,6 @@
 import os
 
 from tracker.common.dynamo_agents.dynamo_agent import DynamoAgent
-from tracker.common.dcp_agents.ingest_agent import IngestAgent
 
 
 class IngestDynamoAgent(DynamoAgent):
@@ -11,27 +10,36 @@ class IngestDynamoAgent(DynamoAgent):
         deployment_stage = os.environ["DEPLOYMENT_STAGE"]
         self.dynamo_table_name = f"dcp-data-dashboard-ingest-info-{deployment_stage}"
         self.table_display_name = "ingest-info"
-        self.ingest_agent = IngestAgent()
 
-    def create_dynamo_payload(self, submission_id):
-        print(f"creating ingest info payload for {submission_id}")
+    def create_dynamo_payload(self, envelope):
+        print(f"creating ingest info payload for {envelope.submission_id}")
         payload = {}
-        envelope = self.ingest_agent.get_envelope(submission_id)
-        project = self.ingest_agent.get_project(submission_id)
-        biomaterials = self.ingest_agent.get_biomaterials(submission_id)
-        protocols = self.ingest_agent.get_protocols(submission_id)
-        bundle_manifest_count = self.ingest_agent.get_bundle_manifest_count(submission_id)
-        project_uuid = project['uuid']['uuid']
-        payload['submission_id'] = submission_id
-        payload['submission_date'] = envelope['submissionDate']
-        payload['project_uuid'] = project_uuid
-        payload['project_short_name'] = self.ingest_agent.get_project_short_name_from_project(project)
-        payload['project_title'] = self.ingest_agent.get_project_title_from_project(project)
-        payload['submission_status'] = envelope['submissionState']
-        payload['submission_bundles_exported_count'] = bundle_manifest_count
-        payload['species'] = self.ingest_agent.get_unique_species_set_from_biomaterials(biomaterials)
-        payload['library_construction_methods'] = self.ingest_agent.get_unique_library_construction_methods_from_protocols(protocols)
-        primary_investigator, data_curator = self.ingest_agent.get_primary_investigator_and_data_curator_from_project(project)
-        payload['primary_investigator'] = primary_investigator
-        payload['data_curator'] = data_curator
+        project = envelope.project()
+        payload['submission_id'] = envelope.submission_id
+        payload['submission_date'] = envelope.submission_date
+        payload['project_uuid'] = project.uuid
+        payload['project_short_name'] = project.short_name
+        payload['project_title'] = project.title
+        payload['submission_status'] = envelope.status
+        payload['submission_bundles_exported_count'] = envelope.bundle_count()
+
+        project_species = set()
+        for biomaterial in envelope.biomaterials():
+            for species in biomaterial.species:
+                project_species.add(species)
+        if len(project_species) == 0:
+            raise RuntimeError('No species found from biomaterials in this project')
+        payload['species'] = sorted(project_species)
+
+        project_library_construction_methods = set()
+        for protocol in envelope.protocols():
+            method = protocol.library_construction_method
+            if method:
+                project_library_construction_methods.add(method)
+        if len(project_library_construction_methods) == 0:
+            raise RuntimeError('No library construction methods found from protocols in this project')
+        payload['library_construction_methods'] = sorted(project_library_construction_methods)
+
+        payload['primary_investigator'] = project.primary_investigator
+        payload['data_curator'] = project.data_curator
         return payload

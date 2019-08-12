@@ -7,4 +7,4 @@ cromwell-tools>=2.2.3,<3
 termcolor
 hca >= 6.3.0, <7
 psycopg2-binary==2.7.5
-dcplib >= 2.0.2, < 3
+dcplib >= 3.2.1, < 4
