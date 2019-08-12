@@ -2,6 +2,9 @@ import json
 import os
 import unittest
 
+from dcplib.component_agents import IngestApiAgent
+from dcplib.component_entities.ingest_entities import SubmissionEnvelope
+
 from tracker.common.dynamo_agents.ingest_dynamo_agent import IngestDynamoAgent
 from tracker.common.dynamo_agents.dss_dynamo_agent import DSSDynamoAgent
 from tracker.common.dynamo_agents.matrix_dynamo_agent import MatrixDynamoAgent
@@ -40,15 +43,17 @@ PAYLOAD_COUNT_EXPECTATIONS = {
 class TestPayloadCreation(unittest.TestCase):
 
     def setUp(self):
-        deployment_stage = os.environ['DEPLOYMENT_STAGE']
-        self.project = PAYLOAD_COUNT_EXPECTATIONS[deployment_stage]['project']
+        self.deployment_stage = os.environ['DEPLOYMENT_STAGE']
+        self.project = PAYLOAD_COUNT_EXPECTATIONS[self.deployment_stage]['project']
         self.submission_id = self.project['submission_id']
         self.project_uuid = self.project['project_uuid']
 
     def test_ingest_payload(self):
+        ingest_api_agent = IngestApiAgent(deployment=self.deployment_stage)
+        envelope = SubmissionEnvelope.load_by_id(self.submission_id, ingest_api_agent=ingest_api_agent)
         ingest_dynamo_agent = IngestDynamoAgent()
 
-        payload = ingest_dynamo_agent.create_dynamo_payload(self.submission_id)
+        payload = ingest_dynamo_agent.create_dynamo_payload(envelope)
 
         self.assertEqual(payload['submission_id'], self.submission_id)
         self.assertEqual(payload['submission_date'], self.project['submission_date'])
