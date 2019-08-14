@@ -46,7 +46,7 @@ class TestAnalysisAgent(object):
         monkeypatch.setenv('DEPLOYMENT_STAGE', 'integration')
         monkeypatch.setattr(analysis_agent.AnalysisAgent, 'analysis_gcp_creds', test_config)
         agent = analysis_agent.AnalysisAgent()
-        assert agent.cromwell_collection == 'lira-test'
+        assert agent.cromwell_collection == 'lira-int'
 
     def test_analysis_agent_can_resolve_the_right_collection_for_non_integration_deployments(self, monkeypatch, deployments, test_config):
         for deployment in deployments:
