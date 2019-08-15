@@ -1,4 +1,6 @@
 import os
+import signal
+import time
 
 from hca.util.pool import ThreadPool
 from dcplib.component_agents import IngestApiAgent
@@ -32,15 +34,49 @@ matrix_dynamo_agent = MatrixDynamoAgent()
 azul_dynamo_agent = AzulDynamoAgent()
 
 
+class Statistics:
+
+    REPORT_EVERY_X_SECONDS = 5
+
+    statistics = {
+        'envelopes_retrieved': 0,
+        'envelope_not_ready': 0,
+        'envelope_has_no_project': 0,
+        'project_is_excluded': 0,
+        'error_while_tracking': 0,
+        'successfully_tracked': 0
+    }
+
+    time_of_last_report = None
+
+    @classmethod
+    def increment(cls, stat):
+        cls.statistics[stat] += 1
+        cls.report()
+
+    @classmethod
+    def report(cls, force=False):
+        if force or not cls.time_of_last_report or time.time() - cls.time_of_last_report > cls.REPORT_EVERY_X_SECONDS:
+            print(cls.statistics)
+            cls.time_of_last_report = time.time()
+
+
 def track_envelope_data_moving_through_dcp(envelope, failures={}):
+    if envelope.is_unprocessed:
+        Statistics.increment('envelope_not_ready')
+        return
+
     try:
-        if envelope.is_unprocessed:
-            print(f"Submission {envelope.submission_id} is unprocessed ({envelope.status})")
-            return
         project = envelope.project()
-        if _is_excluded_project(project):
-            print(f"Submission {envelope.submission_id} is excluded (project {project.short_name})")
-            return
+    except RuntimeError:
+        Statistics.increment('envelope_has_no_project')
+        return
+
+    if _is_excluded_project(project):
+        Statistics.increment('project_is_excluded')
+        return
+
+    try:
         # Create project payloads
         ingest_submission_payload = ingest_dynamo_agent.create_dynamo_payload(envelope)
         dss_project_payload = dss_dynamo_agent.create_dynamo_payload(project.uuid)
@@ -54,9 +90,12 @@ def track_envelope_data_moving_through_dcp(envelope, failures={}):
         analysis_dynamo_agent.write_item_to_dynamo(analysis_project_payload)
         matrix_dynamo_agent.write_item_to_dynamo(matrix_project_payload)
         azul_dynamo_agent.write_item_to_dynamo(azul_project_payload)
+        Statistics.increment('successfully_tracked')
+
     except Exception as e:
         failures[envelope.submission_id] = e
         print(f"Submission {envelope.submission_id} failed with error: {e}")
+        Statistics.increment('error_while_tracking')
 
 
 def _is_excluded_project(project):
@@ -66,13 +105,21 @@ def _is_excluded_project(project):
     return False
 
 
+def _exit_on_signal(sig, frame):
+    Statistics.report(force=True)
+    exit(1)
+
+
 def main():
     failures = {}
+    signal.signal(signal.SIGINT, _exit_on_signal)
     ingest_agent = IngestApiAgent(deployment=DEPLOYMENT_STAGE)
     pool = ThreadPool()
-    for envelope in SubmissionEnvelope.iter_submissions(ingest_api_agent=ingest_agent, page_size=1000):
+    for envelope in SubmissionEnvelope.iter_submissions(ingest_api_agent=ingest_agent, page_size=1000, sort_by=None):
+        Statistics.increment('envelopes_retrieved')
         pool.add_task(track_envelope_data_moving_through_dcp, envelope, failures)
     pool.wait_for_completion()
+    Statistics.report(force=True)
     print(f"{len(failures)} projects failed during refresh")
     if len(failures) > 0:
         raise Exception(failures)
