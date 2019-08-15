@@ -1,5 +1,5 @@
-boto3>1.9.44
-botocore==1.12.119
+boto3 > 1.9.201
+botocore == 1.12.208
 connexion==1.5.2
 tenacity==5.0.2
 requests==2.20.0
