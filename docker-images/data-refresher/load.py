@@ -80,9 +80,10 @@ def track_envelope_data_moving_through_dcp(envelope, failures={}):
         # Create project payloads
         ingest_submission_payload = ingest_dynamo_agent.create_dynamo_payload(envelope)
         dss_project_payload = dss_dynamo_agent.create_dynamo_payload(project.uuid)
-        analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(envelope.submission_id, project.uuid)
-        matrix_project_payload = matrix_dynamo_agent.create_dynamo_payload(project.uuid)
-        azul_project_payload = azul_dynamo_agent.create_dynamo_payload(project.uuid)
+        latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(project.uuid)
+        analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(envelope.submission_id, project.uuid, latest_primary_bundles)
+        matrix_project_payload = matrix_dynamo_agent.create_dynamo_payload(project.uuid, latest_analysis_bundles)
+        azul_project_payload = azul_dynamo_agent.create_dynamo_payload(project.uuid, latest_primary_bundles, latest_analysis_bundles)
 
         # Save project payloads once all created
         ingest_dynamo_agent.write_item_to_dynamo(ingest_submission_payload)
