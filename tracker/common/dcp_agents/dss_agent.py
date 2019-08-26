@@ -21,7 +21,7 @@ class DSSAgent:
         dss_config['DSSClient']['swagger_url'] = swagger_url
         self.client = DSSClient(config=dss_config)
 
-    def primary_bundle_count_for_project(self, project_uuid, replica='aws'):
+    def get_primary_bundles_for_project(self, project_uuid, replica):
         query = {
             "query": {
                 "bool": {
@@ -53,32 +53,57 @@ class DSSAgent:
                 }
             }
         }
-        results = self.search(query, replica)
-        total_hits = results['total_hits']
-        return total_hits
+        bundles = self._search_and_return_full_bundle_payload(query, replica)
+        return bundles
 
-    def total_bundle_count_for_project(self, project_uuid, replica='aws'):
+    def get_analysis_bundles_for_project(self, project_uuid, replica):
         query = {
             "query": {
                 "bool": {
-                    "must": {
-                        "match": {
-                            "files.project_json.provenance.document_id": project_uuid
+                    "must": [
+                        {
+                            "match": {
+                                "files.project_json.provenance.document_id": project_uuid
+                            }
+                        },
+                        {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "match": {
+                                            "files.analysis_process_json.type.text": "analysis"
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "files.analysis_process_json.process_type.text": "analysis"
+                                        }
+                                    }
+                                ],
+                                "minimum_number_should_match": 1
+                            }
                         }
-                    }
+                    ]
                 }
             }
         }
-        results = self.search(query, replica)
-        if results and results.get('total_hits'):
-            total_hits = results['total_hits']
-        else:
-            total_hits = 0
-        return total_hits
+        bundles = self._search_and_return_full_bundle_payload(query, replica)
+        return bundles
+
+    def _search_and_return_full_bundle_payload(self, query, replica):
+        bundles = []
+        for result in self.search(query, replica):
+            bundle = {}
+            bundle_fqid = result['bundle_fqid']
+            bundle['fqid'] = bundle_fqid
+            bundle['uuid'] = bundle_fqid.split('.')[0]
+            bundle['version'] = bundle_fqid.split('.')[1]
+            bundles.append(bundle)
+        return bundles
 
     def search(self, query, replica='aws'):
         try:
-            response = self.client.post_search(replica=replica, es_query=query)
+            response = self.client.post_search.iterate(replica=replica, es_query=query)
             return response
         except SwaggerAPIException:
             return []

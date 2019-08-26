@@ -11,6 +11,7 @@ from tracker.common.dynamo_agents.dss_dynamo_agent import DSSDynamoAgent
 from tracker.common.dynamo_agents.matrix_dynamo_agent import MatrixDynamoAgent
 from tracker.common.dynamo_agents.azul_dynamo_agent import AzulDynamoAgent
 from tracker.common.dynamo_agents.analysis_dynamo_agent import AnalysisDynamoAgent
+from tracker.common.dynamo_agents.project_dynamo_agent import ProjectDynamoAgent
 
 DEPLOYMENT_STAGE = os.environ['DEPLOYMENT_STAGE']
 PROJECT_NAME_STRINGS_TO_EXCLUDE_FROM_TRACKER = [
@@ -26,12 +27,14 @@ PROJECT_NAME_STRINGS_TO_EXCLUDE_FROM_TRACKER = [
     'Q4_DEMO-project',
     'Glioblastoma_small'
 ]
+SUBMISSION_DATE_CUTOFF = '2019-05-10T00:00:00.000Z'
 
 ingest_dynamo_agent = IngestDynamoAgent()
 dss_dynamo_agent = DSSDynamoAgent()
 analysis_dynamo_agent = AnalysisDynamoAgent()
 matrix_dynamo_agent = MatrixDynamoAgent()
 azul_dynamo_agent = AzulDynamoAgent()
+project_dynamo_agent = ProjectDynamoAgent()
 
 
 class Statistics:
@@ -42,6 +45,7 @@ class Statistics:
         'envelopes_retrieved': 0,
         'envelope_not_ready': 0,
         'envelope_has_no_project': 0,
+        'envelope_too_old': 0,
         'project_is_excluded': 0,
         'error_while_tracking': 0,
         'successfully_tracked': 0
@@ -62,6 +66,10 @@ class Statistics:
 
 
 def track_envelope_data_moving_through_dcp(envelope, failures={}):
+    if envelope.submission_date < SUBMISSION_DATE_CUTOFF:
+        Statistics.increment('envelope_too_old')
+        return
+
     if envelope.is_unprocessed:
         Statistics.increment('envelope_not_ready')
         return
@@ -77,19 +85,24 @@ def track_envelope_data_moving_through_dcp(envelope, failures={}):
         return
 
     try:
-        # Create project payloads
         ingest_submission_payload = ingest_dynamo_agent.create_dynamo_payload(envelope)
-        dss_project_payload = dss_dynamo_agent.create_dynamo_payload(project.uuid)
-        analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(envelope.submission_id, project.uuid)
-        matrix_project_payload = matrix_dynamo_agent.create_dynamo_payload(project.uuid)
-        azul_project_payload = azul_dynamo_agent.create_dynamo_payload(project.uuid)
+        latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(project.uuid)
+        analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(envelope.submission_id, project.uuid, latest_primary_bundles, envelope)
+        dss_project_payload = dss_dynamo_agent.create_dynamo_payload(project.uuid, envelope)
+        matrix_project_payload = matrix_dynamo_agent.create_dynamo_payload(project.uuid, latest_analysis_bundles)
+        azul_project_payload = azul_dynamo_agent.create_dynamo_payload(project.uuid, latest_primary_bundles, latest_analysis_bundles)
+        project_payload = project_dynamo_agent.create_dynamo_payload(ingest_submission_payload,
+                                                                     dss_project_payload,
+                                                                     azul_project_payload,
+                                                                     analysis_project_payload,
+                                                                     matrix_project_payload)
 
-        # Save project payloads once all created
         ingest_dynamo_agent.write_item_to_dynamo(ingest_submission_payload)
-        dss_dynamo_agent.write_item_to_dynamo(dss_project_payload)
         analysis_dynamo_agent.write_item_to_dynamo(analysis_project_payload)
+        dss_dynamo_agent.write_item_to_dynamo(dss_project_payload)
         matrix_dynamo_agent.write_item_to_dynamo(matrix_project_payload)
         azul_dynamo_agent.write_item_to_dynamo(azul_project_payload)
+        project_dynamo_agent.write_item_to_dynamo(project_payload)
         Statistics.increment('successfully_tracked')
 
     except Exception as e:
