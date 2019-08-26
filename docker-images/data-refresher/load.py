@@ -27,6 +27,7 @@ PROJECT_NAME_STRINGS_TO_EXCLUDE_FROM_TRACKER = [
     'Q4_DEMO-project',
     'Glioblastoma_small'
 ]
+SUBMISSION_DATE_CUTOFF = '2019-05-10T00:00:00.000Z'
 
 ingest_dynamo_agent = IngestDynamoAgent()
 dss_dynamo_agent = DSSDynamoAgent()
@@ -65,7 +66,7 @@ class Statistics:
 
 
 def track_envelope_data_moving_through_dcp(envelope, failures={}):
-    if envelope.submission_date < '2019-05-10T00:00:00.000Z':
+    if envelope.submission_date < SUBMISSION_DATE_CUTOFF:
         Statistics.increment('envelope_too_old')
         return
 
