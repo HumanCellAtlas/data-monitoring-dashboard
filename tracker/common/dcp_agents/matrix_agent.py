@@ -1,7 +1,10 @@
 import os
 
 from dcplib.config import Config
-import psycopg2 as pg
+try:
+    import psycopg2 as pg
+except:
+    print("Skipping import of psycopg2")
 
 
 class MatrixRedshiftConfig(Config):
@@ -22,13 +25,12 @@ class MatrixAgent:
         cell_count = results[0][0]
         return cell_count
 
-    def get_bundle_count_for_project(self, project_uuid):
-        query = f"select count(*) from (select distinct(analysis.analysiskey) \
+    def get_bundles_for_project(self, project_uuid):
+        query = f"select * from (select distinct(analysis.analysiskey), analysis.bundle_fqid \
             from analysis LEFT OUTER JOIN cell on analysis.analysiskey = cell.analysiskey \
             where cell.projectkey = '{project_uuid}');"
         results = self._run_query(query)
-        bundle_count = results[0][0]
-        return bundle_count
+        return results
 
     @property
     def readonly_database_uri(self):

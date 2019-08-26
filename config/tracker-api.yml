@@ -23,3 +23,22 @@ paths:
       responses:
         "200":
           description: "Payload of projects"
+  /project/{project_uuid}:
+    get:
+      summary: "Retrieve a project."
+      description: "Retrieve a project."
+      operationId: tracker.lambdas.api_server.core.get_project
+      tags:
+        - API
+      parameters:
+        - name: project_uuid
+          in: path
+          description: A RFC4122-compliant ID for a project.
+          required: true
+          type: string
+          pattern: "[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}"
+      responses:
+        "200":
+          description: "Payload of project"
+        "404":
+          description: "Project not found"

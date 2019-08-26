@@ -28,7 +28,8 @@ class DynamoAgent:
             Key=table_key,
             ConsistentRead=True
         )['Item']
-        return item
+        payload = {'record': item, 'table_name': self.table_display_name}
+        return payload
 
     def get_all_items(self):
         table = DYNAMO.Table(self.dynamo_table_name)

@@ -22,15 +22,22 @@ class IngestDynamoAgent(DynamoAgent):
         payload['project_title'] = project.title
         payload['submission_status'] = envelope.status
         payload['submission_bundles_exported_count'] = envelope.bundle_count()
+        payload['species'] = self._get_project_species(envelope)
+        payload['library_construction_methods'] = self._get_project_library_construction_methods(envelope)
+        payload['primary_investigator'] = project.primary_investigator
+        payload['data_curator'] = project.data_curator
+        primary_state = self._determine_state_of_primary_data(envelope.status)
+        payload['primary_state'] = primary_state
+        return payload
 
-        project_species = set()
-        for biomaterial in envelope.biomaterials():
-            for species in biomaterial.species:
-                project_species.add(species)
-        if len(project_species) == 0:
-            raise RuntimeError('No species found from biomaterials in this project')
-        payload['species'] = sorted(project_species)
+    def _determine_state_of_primary_data(self, envelope_status):
+        if envelope_status != 'Complete':
+            primary_state = 'INCOMPLETE'
+        else:
+            primary_state = 'COMPLETE'
+        return primary_state
 
+    def _get_project_library_construction_methods(self, envelope):
         project_library_construction_methods = set()
         for protocol in envelope.protocols():
             method = protocol.library_construction_method
@@ -38,8 +45,13 @@ class IngestDynamoAgent(DynamoAgent):
                 project_library_construction_methods.add(method)
         if len(project_library_construction_methods) == 0:
             raise RuntimeError('No library construction methods found from protocols in this project')
-        payload['library_construction_methods'] = sorted(project_library_construction_methods)
+        return sorted(project_library_construction_methods)
 
-        payload['primary_investigator'] = project.primary_investigator
-        payload['data_curator'] = project.data_curator
-        return payload
+    def _get_project_species(self, envelope):
+        project_species = set()
+        for biomaterial in envelope.biomaterials():
+            for species in biomaterial.species:
+                project_species.add(species)
+        if len(project_species) == 0:
+            raise RuntimeError('No species found from biomaterials in this project')
+        return sorted(project_species)

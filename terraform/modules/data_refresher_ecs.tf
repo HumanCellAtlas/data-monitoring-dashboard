@@ -165,7 +165,8 @@ resource "aws_iam_role_policy" "data_refresher" {
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-matrix-info-${var.deployment_stage}",
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-azul-info-${var.deployment_stage}",
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-analysis-info-${var.deployment_stage}",
-            "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-dss-info-${var.deployment_stage}"
+            "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-dss-info-${var.deployment_stage}",
+            "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-project-info-${var.deployment_stage}"
           ]
         }
     ]
