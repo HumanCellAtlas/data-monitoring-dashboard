@@ -27,6 +27,6 @@ bump_version:
 	expr `cat VERSION` + 1 > VERSION
 
 test:
-	docker run -e DEPLOYMENT_STAGE=${DEPLOYMENT_STAGE} -e AWS_DEFAULT_REGION=us-east-1 -v ~/.aws:/root/.aws -e AWS_PROFILE=hca-prod --rm -it $(IMAGE):$(VERSION)
+	docker run -e DEPLOYMENT_STAGE=${DEPLOYMENT_STAGE} -e AWS_DEFAULT_REGION=us-east-1 -v ~/.aws:/root/.aws -e AWS_PROFILE=hca --rm -it $(IMAGE):$(VERSION)
 
 .phony: build bump_version promote push

@@ -38,7 +38,9 @@ class ProjectDynamoAgent(DynamoAgent):
     def _determine_project_analysis_state(self, primary_state, dss_info, analysis_info, azul_info):
         if primary_state == 'OUT_OF_DATE' or primary_state == 'INCOMPLETE':
             return primary_state
-        elif analysis_info['analysis_state'] == 'INCOMPLETE' or dss_info['analysis_state'] == 'INCOMPLETE' or azul_info['analysis_state'] == 'INCOMPLETE':
+        elif (analysis_info['analysis_state'] == 'INCOMPLETE' or
+                dss_info['analysis_state'] == 'INCOMPLETE' or
+                azul_info['analysis_state'] == 'INCOMPLETE'):
             return 'INCOMPLETE'
         elif analysis_info['analysis_state'] == 'OUT_OF_DATE' or azul_info['analysis_state'] == 'OUT_OF_DATE':
             return 'OUT_OF_DATE'

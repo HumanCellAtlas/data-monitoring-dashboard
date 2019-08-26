@@ -39,5 +39,5 @@ class DynamoAgent:
         payload = {'records': results['Items'], 'table_name': self.table_display_name}
         return payload
 
-    def create_dynamo_payload(self, submission_id):
+    def create_dynamo_payload(self, *args, **kwargs):
         raise Exception("func create_dynamo_payload not implemented in child class")

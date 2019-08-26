@@ -3,7 +3,7 @@ import os
 from dcplib.config import Config
 try:
     import psycopg2 as pg
-except:
+except Exception as e:
     print("Skipping import of psycopg2")
 
 
