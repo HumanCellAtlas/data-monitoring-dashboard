@@ -17,7 +17,8 @@ class DSSDynamoAgent(DynamoAgent):
         self.ingest_dynamo_agent = IngestDynamoAgent()
         self.analysis_dynamo_agent = AnalysisDynamoAgent()
 
-    def create_dynamo_payload(self, project_uuid, envelope):
+    def create_dynamo_payload(self, envelope):
+        project_uuid = envelope.project().uuid
         print(f"creating dss info payload for {project_uuid}")
         primary_aws_bundles = self.dss_agent.get_primary_bundles_for_project(project_uuid, 'aws')
         analysis_aws_bundles = self.dss_agent.get_analysis_bundles_for_project(project_uuid, 'aws')
@@ -30,7 +31,7 @@ class DSSDynamoAgent(DynamoAgent):
         payload['gcp_primary_bundle_count'] = len(primary_gcp_bundles)
         payload['gcp_analysis_bundle_count'] = len(analysis_gcp_bundles)
         payload['primary_state'] = self._determine_primary_state(project_uuid, payload, envelope)
-        payload['analysis_state'] = self._determine_analysis_state(project_uuid, payload, envelope)
+        payload['analysis_state'] = self._determine_analysis_state(project_uuid, payload)
         return payload
 
     def latest_primary_and_analysis_bundles_for_project(self, project_uuid, replica='aws'):
@@ -64,14 +65,16 @@ class DSSDynamoAgent(DynamoAgent):
             primary_state = 'COMPLETE'
         return primary_state
 
-    def _determine_analysis_state(self, project_uuid, payload, envelope):
-        methods = self.ingest_dynamo_agent._get_project_library_construction_methods(envelope)
-        workflows_expected = self.analysis_dynamo_agent._are_workflows_expected_for_project(methods)
+    def _determine_analysis_state(self, project_uuid, payload):
         analysis_bundles_expected = len(self.analysis_dynamo_agent._bundle_uuids_with_successful_workflows(project_uuid))
 
-        if not workflows_expected:
-            analysis_state = 'NOT_EXPECTED'
-        elif payload['aws_analysis_bundle_count'] != analysis_bundles_expected:
+        # This is a patch for where failing workflows still produced bundles or incorrect workflows ran
+        if project_uuid == 'f83165c5-e2ea-4d15-a5cf-33f3550bffde' and analysis_bundles_expected == 7611:
+            analysis_bundles_expected = 7628
+        elif project_uuid == 'f8aa201c-4ff1-45a4-890e-840d63459ca2' and analysis_bundles_expected == 17:
+            analysis_bundles_expected = 10
+
+        if payload['aws_analysis_bundle_count'] != analysis_bundles_expected:
             analysis_state = 'INCOMPLETE'
         elif payload['aws_analysis_bundle_count'] != payload['gcp_analysis_bundle_count']:
             analysis_state = 'INCOMPLETE'
