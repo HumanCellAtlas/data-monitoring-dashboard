@@ -29,8 +29,8 @@ PROJECT_FIXTURE = {
             'project_title': 'Profiling of CD34+ cells from human bone marrow to understand hematopoiesis',
             'submission_status': 'Complete',
             'submission_date': '2019-07-18T21:12:36.392Z',
-            'species': ['Homo sapiens'],
-            'library_construction_methods': ['10X v2 sequencing'],
+            'species': ['homo sapiens'],
+            'library_construction_methods': ['10x v2 sequencing'],
             'primary_investigator': "Dana,, Pe'er; ",
             'data_curator': 'Parisa,, Nejad; ',
             'phases': {
@@ -97,7 +97,7 @@ class TestPayloadCreation(unittest.TestCase):
         self.assertEqual(payload['primary_state'], 'COMPLETE')
 
     def test_dss_payload(self):
-        payload = dss_dynamo_agent.create_dynamo_payload(self.project_uuid, self.envelope)
+        payload = dss_dynamo_agent.create_dynamo_payload(self.envelope)
 
         self.assertEqual(payload['project_uuid'], self.project_uuid)
         self.assertEqual(payload['aws_primary_bundle_count'], self.project['phases']['primary']['bundle_count_expected'])
@@ -109,7 +109,9 @@ class TestPayloadCreation(unittest.TestCase):
 
     def test_analysis_payload(self):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.project_uuid)
-        payload = analysis_dynamo_agent.create_dynamo_payload(self.submission_id, self.project_uuid, latest_primary_bundles, self.envelope)
+        azul_payload = azul_dynamo_agent.create_dynamo_payload(self.project_uuid, latest_primary_bundles, latest_analysis_bundles)
+
+        payload = analysis_dynamo_agent.create_dynamo_payload(self.envelope, latest_primary_bundles, azul_payload)
 
         self.assertEqual(payload['project_uuid'], self.project_uuid)
         self.assertEqual(payload['succeeded_workflows'], self.project['phases']['analysis']['workflow_count_expected'])
@@ -134,16 +136,18 @@ class TestPayloadCreation(unittest.TestCase):
         self.assertEqual(payload['project_uuid'], self.project_uuid)
         self.assertEqual(payload['analysis_bundle_count'], self.project['phases']['analysis']['bundle_count_expected'])
         self.assertEqual(payload['primary_bundle_count'], self.project['phases']['primary']['bundle_count_expected'])
+        self.assertEqual(payload['species'], self.project['species'])
+        self.assertEqual(payload['library_construction_methods'], self.project['library_construction_methods'])
         self.assertEqual(payload['primary_state'], 'COMPLETE')
         self.assertEqual(payload['analysis_state'], 'COMPLETE')
 
     def test_project_payload(self):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.project_uuid)
         ingest_payload = ingest_dynamo_agent.create_dynamo_payload(self.envelope)
-        dss_payload = dss_dynamo_agent.create_dynamo_payload(self.project_uuid, self.envelope)
-        analysis_payload = analysis_dynamo_agent.create_dynamo_payload(self.submission_id, self.project_uuid, latest_primary_bundles, self.envelope)
-        matrix_payload = matrix_dynamo_agent.create_dynamo_payload(self.project_uuid, latest_analysis_bundles)
         azul_payload = azul_dynamo_agent.create_dynamo_payload(self.project_uuid, latest_primary_bundles, latest_analysis_bundles)
+        dss_payload = dss_dynamo_agent.create_dynamo_payload(self.envelope)
+        analysis_payload = analysis_dynamo_agent.create_dynamo_payload(self.envelope, latest_primary_bundles, azul_payload)
+        matrix_payload = matrix_dynamo_agent.create_dynamo_payload(self.project_uuid, latest_analysis_bundles)
 
         project_payload = project_dynamo_agent.create_dynamo_payload(ingest_payload, dss_payload, azul_payload, analysis_payload, matrix_payload)
 
@@ -154,7 +158,7 @@ class TestPayloadCreation(unittest.TestCase):
         self.assertEqual(project_payload['matrix_state'], 'COMPLETE')
 
     def test_latest_primary_and_analysis_bundles_for_project__dss(self):
-        dss_payload = dss_dynamo_agent.create_dynamo_payload(self.updated_project_uuid, self.updated_envelope)
+        dss_payload = dss_dynamo_agent.create_dynamo_payload(self.updated_envelope)
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.updated_project_uuid)
 
         self.assertEqual(dss_payload['project_uuid'], self.updated_project['project_uuid'])
@@ -171,12 +175,15 @@ class TestPayloadCreation(unittest.TestCase):
 
     def test_latest_primary_and_analysis_bundles_for_project__analysis(self):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.updated_project_uuid)
-        analysis_payload = analysis_dynamo_agent.create_dynamo_payload(self.updated_submission_id, self.updated_project_uuid, latest_primary_bundles, self.updated_envelope)
+        azul_payload = azul_dynamo_agent.create_dynamo_payload(self.updated_project_uuid, latest_primary_bundles, latest_analysis_bundles)
+
+        analysis_payload = analysis_dynamo_agent.create_dynamo_payload(self.updated_envelope, latest_primary_bundles, azul_payload)
 
         self.assertEqual(analysis_payload['analysis_state'], 'INCOMPLETE')
 
     def test_latest_primary_and_analysis_bundles_for_project__matrix(self):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.updated_project_uuid)
+
         matrix_payload = matrix_dynamo_agent.create_dynamo_payload(self.updated_project_uuid, latest_analysis_bundles)
 
         self.assertEqual(matrix_payload['analysis_state'], 'INCOMPLETE')

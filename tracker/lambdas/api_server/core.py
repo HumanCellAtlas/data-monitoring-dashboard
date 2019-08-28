@@ -11,16 +11,21 @@ DYNAMO_REFRESHERS = [ProjectDynamoAgent, IngestDynamoAgent, DSSDynamoAgent, Matr
 
 
 def get_projects():
-    projects = defaultdict(dict)
+    projects_dict = defaultdict(dict)
+    projects_list = []
     for dynamo_agent in DYNAMO_REFRESHERS:
         dynamo_handler = dynamo_agent()
         payload = dynamo_handler.get_all_items()
-        projects = _parse_by_project_uuid(projects, payload['records'], payload['table_name'])
-    return projects
+        projects_dict = _parse_by_project_uuid(projects_dict, payload['records'], payload['table_name'])
+    for project_uuid, project_info_dict in projects_dict.items():
+        project_info_dict['project_uuid'] = project_uuid
+        projects_list.append(project_info_dict)
+    return projects_list
 
 
 def get_project(project_uuid):
     project_payload = {}
+    project_payload['project_uuid'] = project_uuid
     for dynamo_agent in DYNAMO_REFRESHERS:
         dynamo_handler = dynamo_agent()
         payload = dynamo_handler.get_item_from_dynamo('project_uuid', project_uuid)
@@ -35,4 +40,5 @@ def _parse_by_project_uuid(target_project_dict, source_records_list, table_name)
     for record in source_records_list:
         project_uuid = record['project_uuid']
         target_project_dict[project_uuid][table_name] = record
+
     return target_project_dict

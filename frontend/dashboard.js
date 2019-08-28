@@ -37,7 +37,7 @@ $(document).ready(function() {
     projectsApiEndpoint = getTrackerApiUrl() + 'v0/projects'
     $.getJSON(projectsApiEndpoint, function(data) {
       $.each( data, function(key, val) {
-        var projectUUID = key
+        var projectUUID = val['project_uuid']
 
         ingestInfo = val['ingest-info']
         ingestPrimaryState = ingestInfo['primary_state']
@@ -65,8 +65,8 @@ $(document).ready(function() {
         var projectTitle = '<b>' + ingestInfo['project_title'] + '</b><br>' + smallText(projectLinkButton) + '<br>' + smallText(primaryInvestigatorDisplay) + '<br>' + smallText(dataWranglerDisplay)
         var projectShortName = '<b>' + ingestInfo['project_short_name'] + '</b><br><smallText>Stats refreshed at: ' + lastUpdatedAt + '</smallText>'
         var submissionId = ingestInfo['submission_id']
-        var species = ingestInfo['species']
-        var methods = ingestInfo['library_construction_methods']
+        var species = azulInfo['species']
+        var methods = azulInfo['library_construction_methods']
 
         // PRIMARY INFO DISPLAY
         var submissionStatus = ingestInfo['submission_status']

@@ -42,16 +42,12 @@ class IngestDynamoAgent(DynamoAgent):
         for protocol in envelope.protocols():
             method = protocol.library_construction_method
             if method:
-                project_library_construction_methods.add(method)
-        if len(project_library_construction_methods) == 0:
-            raise RuntimeError('No library construction methods found from protocols in this project')
+                project_library_construction_methods.add(method.lower())
         return sorted(project_library_construction_methods)
 
     def _get_project_species(self, envelope):
         project_species = set()
         for biomaterial in envelope.biomaterials():
             for species in biomaterial.species:
-                project_species.add(species)
-        if len(project_species) == 0:
-            raise RuntimeError('No species found from biomaterials in this project')
+                project_species.add(species.lower())
         return sorted(project_species)

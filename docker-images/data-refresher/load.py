@@ -87,10 +87,12 @@ def track_envelope_data_moving_through_dcp(envelope, failures={}):
     try:
         ingest_submission_payload = ingest_dynamo_agent.create_dynamo_payload(envelope)
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(project.uuid)
-        analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(envelope.submission_id, project.uuid, latest_primary_bundles, envelope)
-        dss_project_payload = dss_dynamo_agent.create_dynamo_payload(project.uuid, envelope)
-        matrix_project_payload = matrix_dynamo_agent.create_dynamo_payload(project.uuid, latest_analysis_bundles)
         azul_project_payload = azul_dynamo_agent.create_dynamo_payload(project.uuid, latest_primary_bundles, latest_analysis_bundles)
+        analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(envelope,
+                                                                               latest_primary_bundles,
+                                                                               azul_project_payload)
+        dss_project_payload = dss_dynamo_agent.create_dynamo_payload(envelope)
+        matrix_project_payload = matrix_dynamo_agent.create_dynamo_payload(project.uuid, latest_analysis_bundles)
         project_payload = project_dynamo_agent.create_dynamo_payload(ingest_submission_payload,
                                                                      dss_project_payload,
                                                                      azul_project_payload,
