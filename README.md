@@ -8,6 +8,14 @@ prod: https://tracker.data.humancellatlas.org
 staging: https://tracker.staging.data.humancellatlas.org
 integration: https://tracker.integration.data.humancellatlas.org
 
+## How to run the server locally for testing
+1. `export DEPLOYMENT_STAGE=integration` (or `staging` or `prod`)
+2. `make -C chalice build`
+3. `scripts/run_local_server`
+
+The front-end will be served on http://127.0.0.1:8000 and the API on http://127.0.0.1:9000.
+Press Ctrl-C to quit the server.
+
 ## Technical Architecture Diagram
 Coming soon
 
