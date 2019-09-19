@@ -5,6 +5,21 @@ set -euo pipefail
 trap "exit" INT TERM
 trap "kill 0" EXIT
 
+# brew cask install adoptopenjdk
+#curl -o - https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz | tar -xz
+#java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb -port 9001
+
+# terraform dynamodb local: https://github.com/hashicorp/terraform/pull/2825
+
+# For a Boto3 client.
+#ddb = boto3.client('dynamodb', endpoint_url='http://localhost:8000')
+#response = ddb.list_tables()
+#print(response)
+
+# For a Boto3 service resource
+#ddb = boto3.resource('dynamodb', endpoint_url='http://localhost:8000')
+#print(list(ddb.tables.all()))
+
 (cd chalice; chalice local --port 9000) &
 
 python -m http.server -d frontend --bind 127.0.0.1

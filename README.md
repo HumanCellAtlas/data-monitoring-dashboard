@@ -9,9 +9,11 @@ staging: https://tracker.staging.data.humancellatlas.org
 integration: https://tracker.integration.data.humancellatlas.org
 
 ## How to run the server locally for testing
+1. Install a JRE (for example, `brew cask install adoptopenjdk`)
+1. `curl -o - https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz | tar -xz`
 1. `export DEPLOYMENT_STAGE=integration` (or `staging` or `prod`)
-2. `make -C chalice build`
-3. `scripts/run_local_server`
+1. `make -C chalice build`
+1. `scripts/run_local_server`
 
 The front-end will be served on http://127.0.0.1:8000 and the API on http://127.0.0.1:9000.
 Press Ctrl-C to quit the server.

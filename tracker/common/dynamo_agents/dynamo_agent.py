@@ -3,6 +3,14 @@ from datetime import datetime
 
 import boto3
 
+try:
+    import chalice.local
+    resource_args = dict(region_name=os.environ['AWS_DEFAULT_REGION'],
+                         endpoint_url='http://localhost:9001')
+except ImportError:
+    resource_args = dict(region_name=os.environ['AWS_DEFAULT_REGION'])
+
+
 DYNAMO = boto3.resource("dynamodb", region_name=os.environ['AWS_DEFAULT_REGION'])
 
 
