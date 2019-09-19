@@ -26,6 +26,9 @@ $(document).ready(function() {
     var currentUrl = location.protocol + '//' + location.host + location.pathname
     function getTrackerApiUrl() {
         apiUrl = currentUrl.replace('tracker', 'tracker-api')
+        if (location.host.endsWith(":8000")) {
+            apiUrl = currentUrl.replace(":8000", ":9000")
+        }
         return apiUrl
     }
 

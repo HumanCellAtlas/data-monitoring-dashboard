@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -euo pipefail
+
+trap "exit" INT TERM
+trap "kill 0" EXIT
+
+(cd chalice; chalice local --port 9000) &
+
+python -m http.server -d frontend --bind 127.0.0.1
