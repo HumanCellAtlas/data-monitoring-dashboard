@@ -1,5 +1,6 @@
 import os
 
+from tracker.common.dynamo_agents.analysis_dynamo_agent import AnalysisDynamoAgent
 from tracker.common.dynamo_agents.dynamo_agent import DynamoAgent
 from tracker.common.dcp_agents.matrix_agent import MatrixAgent
 
@@ -23,6 +24,7 @@ class MatrixDynamoAgent(DynamoAgent):
         self.dynamo_table_name = f"dcp-data-dashboard-matrix-info-{deployment_stage}"
         self.table_display_name = "matrix-info"
         self.agent = MatrixAgent()
+        self.analysis_dynamo_agent = AnalysisDynamoAgent()
 
     def create_dynamo_payload(self, project_uuid, latest_analysis_bundles, azul_info):
         print(f"creating matrix info payload for {project_uuid}")
@@ -38,12 +40,17 @@ class MatrixDynamoAgent(DynamoAgent):
         return payload
 
     def _matrix_bundle_count_expected_for_project(self, azul_info):
+        project_uuid = azul_info['project_uuid']
+        analysis_bundles_expected = len(self.analysis_dynamo_agent._bundle_uuids_with_successful_workflows(project_uuid))
         project_bundle_type_counter = azul_info['primary_bundle_type_counter']
-        matrix_expected = 0
+        matrix_bundles_expected = 0
         for method in METHODS_SUPPORTED_FOR_MATRIX:
             if project_bundle_type_counter.get(method.lower()):
-                matrix_expected += project_bundle_type_counter[method.lower()]
-        return matrix_expected
+                matrix_bundles_expected += project_bundle_type_counter[method.lower()]
+        if matrix_bundles_expected > analysis_bundles_expected:
+            return analysis_bundles_expected
+        else:
+            return matrix_bundles_expected
 
     def _determine_state_of_analysis_data(self, query_results, latest_analysis_bundles, matrix_bundles_expected):
         all_bundle_uuids_indexed = set()

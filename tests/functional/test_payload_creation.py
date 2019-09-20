@@ -188,4 +188,4 @@ class TestPayloadCreation(unittest.TestCase):
 
         matrix_payload = matrix_dynamo_agent.create_dynamo_payload(self.updated_project_uuid, latest_analysis_bundles, azul_payload)
 
-        self.assertEqual(matrix_payload['analysis_state'], 'INCOMPLETE')
+        self.assertEqual(matrix_payload['analysis_state'], 'COMPLETE')
