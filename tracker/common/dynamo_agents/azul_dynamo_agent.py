@@ -20,6 +20,7 @@ class AzulDynamoAgent(DynamoAgent):
         primary_bundles_indexed = []
         analysis_bundles_indexed = []
         primary_bundle_type_counter = Counter()
+        analysis_bundle_type_counter = Counter()
         species = set()
         methods = set()
         for bundle in bundles:
@@ -27,9 +28,10 @@ class AzulDynamoAgent(DynamoAgent):
             workflow = bundle['protocols'][0]['workflow']
             if workflow:
                 analysis_bundles_indexed.append(bundle_info)
+                self._increment_bundle_type_by_species_and_method_counter(analysis_bundle_type_counter, bundle)
             else:
                 primary_bundles_indexed.append(bundle_info)
-                bundle_species, bundle_method = self._increment_primary_bundle_type_by_species_and_method_counter(primary_bundle_type_counter, bundle)
+                bundle_species, bundle_method = self._increment_bundle_type_by_species_and_method_counter(primary_bundle_type_counter, bundle)
                 species.add(bundle_species)
                 methods.add(bundle_method)
 
@@ -42,6 +44,7 @@ class AzulDynamoAgent(DynamoAgent):
         payload['species'] = sorted(species)
         payload['library_construction_methods'] = sorted(methods)
         payload['primary_bundle_type_counter'] = dict(primary_bundle_type_counter)
+        payload['analysis_bundle_type_counter'] = dict(analysis_bundle_type_counter)
         return payload
 
     def _determine_phase_state(self, bundles_indexed, latest_bundles):
@@ -66,7 +69,7 @@ class AzulDynamoAgent(DynamoAgent):
 
         return state
 
-    def _increment_primary_bundle_type_by_species_and_method_counter(self, counter, bundle):
+    def _increment_bundle_type_by_species_and_method_counter(self, counter, bundle):
         donor_organism = bundle['donorOrganisms'][0]
         species = donor_organism['genusSpecies'][0].lower()
 

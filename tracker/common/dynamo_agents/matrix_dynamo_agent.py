@@ -40,17 +40,12 @@ class MatrixDynamoAgent(DynamoAgent):
         return payload
 
     def _matrix_bundle_count_expected_for_project(self, azul_info):
-        project_uuid = azul_info['project_uuid']
-        analysis_bundles_expected = len(self.analysis_dynamo_agent._bundle_uuids_with_successful_workflows(project_uuid))
-        project_bundle_type_counter = azul_info['primary_bundle_type_counter']
+        project_bundle_type_counter = azul_info['analysis_bundle_type_counter']
         matrix_bundles_expected = 0
         for method in METHODS_SUPPORTED_FOR_MATRIX:
             if project_bundle_type_counter.get(method.lower()):
                 matrix_bundles_expected += project_bundle_type_counter[method.lower()]
-        if matrix_bundles_expected > analysis_bundles_expected:
-            return analysis_bundles_expected
-        else:
-            return matrix_bundles_expected
+        return matrix_bundles_expected
 
     def _determine_state_of_analysis_data(self, query_results, latest_analysis_bundles, matrix_bundles_expected):
         all_bundle_uuids_indexed = set()
