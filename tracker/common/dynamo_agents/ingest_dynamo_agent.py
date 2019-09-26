@@ -37,6 +37,7 @@ class IngestDynamoAgent(DynamoAgent):
 
     def _aggregrate_analysis_envelopes_status_count(self, latest_primary_bundles, analysis_envelopes_map):
         envelope_statuses_count = Counter()
+        envelope_statuses_count['Total'] = 0
         for uuid, bundle in latest_primary_bundles.items():
             statuses = analysis_envelopes_map.get(uuid, [])
             for status in statuses:
