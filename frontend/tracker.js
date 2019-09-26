@@ -44,6 +44,7 @@ $(document).ready(function() {
 
         ingestInfo = val['ingest-info']
         ingestPrimaryState = ingestInfo['primary_state']
+        ingestAnalysisState = ingestInfo['analysis_state']
 
         azulInfo = val['azul-info']
         azulPrimaryState = azulInfo['primary_state']
@@ -114,6 +115,15 @@ $(document).ready(function() {
         workflowStatsByStatusDisplay = convertTextToDisplayDiv(workflowStatsByStatusDisplay, analysisAnalysisState)
         workflowStatsByVersionDisplay = convertTextToDisplayDiv(workflowStatsByVersionDisplay, analysisAnalysisState)
 
+        analysisEnvelopesDisplay = 'Total' + ': ' + ingestInfo['Total_envelopes'] + '<br>'
+        $.each(ingestInfo, function(key, val) {
+            if(key.includes('_envelopes') && key != 'Total_envelopes'){
+                var envelopeStatus = key.split('_envelopes')[0].capitalize()
+                analysisEnvelopesDisplay = analysisEnvelopesDisplay + envelopeStatus + ': ' + val + '<br>'
+            }
+        })
+        analysisEnvelopesDisplay = convertTextToDisplayDiv(analysisEnvelopesDisplay, ingestAnalysisState)
+
         var azulPrimaryBundleCount = azulInfo['primary_bundle_count']
         var azulAnalysisBundleCount = azulInfo['analysis_bundle_count']
         azulPrimaryBundleCountDisplay = convertTextToDisplayDiv(azulPrimaryBundleCount, azulAnalysisState)
@@ -138,6 +148,7 @@ $(document).ready(function() {
             azulPrimaryBundleCountDisplay,
             workflowStatsByStatusDisplay,
             workflowStatsByVersionDisplay,
+            analysisEnvelopesDisplay,
             dssAnalysisBundleCountDisplay,
             azulAnalysisBundleCountDisplay,
             matrixAnalysisBundleCountDisplay,

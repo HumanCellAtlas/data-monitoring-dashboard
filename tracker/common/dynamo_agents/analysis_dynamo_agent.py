@@ -56,7 +56,7 @@ class AnalysisDynamoAgent(DynamoAgent):
             input_bundle_uuid = workflow['labels']['bundle-uuid']
             input_bundle_version = workflow['labels']['bundle-version']
             workflow_status = workflow['status']
-            latest_bundle_version = latest_primary_bundles[input_bundle_uuid]['version']
+            latest_bundle_version = latest_primary_bundles.get(input_bundle_uuid, {}).get('version', 'N/A')
             if workflow_status == 'Succeeded':
                 input_bundle_uuids_with_successful_workflows.add(input_bundle_uuid)
                 if latest_bundle_version in input_bundle_version:

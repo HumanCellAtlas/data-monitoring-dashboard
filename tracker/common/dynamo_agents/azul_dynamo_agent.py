@@ -53,7 +53,7 @@ class AzulDynamoAgent(DynamoAgent):
         for bundle in bundles_indexed:
             bundle_uuid = bundle['bundleUuid']
             bundle_version = bundle['bundleVersion']
-            expected_bundle_version = latest_bundles[bundle_uuid]['version']
+            expected_bundle_version = latest_bundles.get(bundle_uuid, {}).get('version', 'N/A')
             if expected_bundle_version in bundle_version:
                 bundle_uuids_indexed_on_latest.add(bundle_uuid)
             all_bundle_uuids_indexed.add(bundle_uuid)

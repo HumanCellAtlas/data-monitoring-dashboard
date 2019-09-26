@@ -1,3 +1,5 @@
+from collections import defaultdict
+import multiprocessing
 import os
 import signal
 import time
@@ -48,7 +50,8 @@ class Statistics:
         'envelope_too_old': 0,
         'project_is_excluded': 0,
         'error_while_tracking': 0,
-        'successfully_tracked': 0
+        'successfully_tracked': 0,
+        'analysis_envelope': 0
     }
 
     time_of_last_report = None
@@ -65,7 +68,7 @@ class Statistics:
             cls.time_of_last_report = time.time()
 
 
-def track_envelope_data_moving_through_dcp(envelope, failures={}):
+def track_envelope_data_moving_through_dcp(envelope, analysis_envelopes_map, failures):
     if envelope.submission_date < SUBMISSION_DATE_CUTOFF:
         Statistics.increment('envelope_too_old')
         return
@@ -85,8 +88,8 @@ def track_envelope_data_moving_through_dcp(envelope, failures={}):
         return
 
     try:
-        ingest_submission_payload = ingest_dynamo_agent.create_dynamo_payload(envelope)
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(project.uuid)
+        ingest_submission_payload = ingest_dynamo_agent.create_dynamo_payload(envelope, latest_primary_bundles, analysis_envelopes_map)
         azul_project_payload = azul_dynamo_agent.create_dynamo_payload(project.uuid, latest_primary_bundles, latest_analysis_bundles)
         analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(envelope,
                                                                                latest_primary_bundles,
@@ -113,6 +116,27 @@ def track_envelope_data_moving_through_dcp(envelope, failures={}):
         Statistics.increment('error_while_tracking')
 
 
+def track_analysis_envelope(envelope, analysis_envelopes_map):
+    if envelope.submission_date < SUBMISSION_DATE_CUTOFF:
+        Statistics.increment('envelope_too_old')
+        return
+
+    try:
+        project = envelope.project()
+        return
+    except RuntimeError:
+        Statistics.increment('analysis_envelope')
+
+    try:
+        processes = envelope.processes()
+        for process in processes:
+            input_bundles = process.input_bundles
+            for bundle in input_bundles:
+                analysis_envelopes_map[bundle].append(envelope.status)
+    except Exception as e:
+        print(f"Analysis submission {envelope.submission_id} failed with error: {e}")
+
+
 def _is_excluded_project(project):
     for exclude_name in PROJECT_NAME_STRINGS_TO_EXCLUDE_FROM_TRACKER:
         if exclude_name in project.short_name:
@@ -129,10 +153,18 @@ def main():
     failures = {}
     signal.signal(signal.SIGINT, _exit_on_signal)
     ingest_agent = IngestApiAgent(deployment=DEPLOYMENT_STAGE)
-    pool = ThreadPool()
+    pool = ThreadPool(multiprocessing.cpu_count() * 4)
+
+    analysis_envelopes_map = defaultdict(list)
     for envelope in SubmissionEnvelope.iter_submissions(ingest_api_agent=ingest_agent, page_size=1000, sort_by=None):
         Statistics.increment('envelopes_retrieved')
-        pool.add_task(track_envelope_data_moving_through_dcp, envelope, failures)
+        pool.add_task(track_analysis_envelope, envelope, analysis_envelopes_map)
+    pool.wait_for_completion()
+
+    failures = {}
+    for envelope in SubmissionEnvelope.iter_submissions(ingest_api_agent=ingest_agent, page_size=1000, sort_by=None):
+        Statistics.increment('envelopes_retrieved')
+        pool.add_task(track_envelope_data_moving_through_dcp, envelope, analysis_envelopes_map, failures)
     pool.wait_for_completion()
     Statistics.report(force=True)
     print(f"{len(failures)} projects failed during refresh")

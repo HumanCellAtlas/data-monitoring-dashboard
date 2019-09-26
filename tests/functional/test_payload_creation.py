@@ -81,7 +81,8 @@ class TestPayloadCreation(unittest.TestCase):
         self.updated_envelope = SubmissionEnvelope.load_by_id(self.updated_submission_id, ingest_api_agent=self.ingest_api_agent)
 
     def test_ingest_payload(self):
-        payload = ingest_dynamo_agent.create_dynamo_payload(self.envelope)
+        latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.project_uuid)
+        payload = ingest_dynamo_agent.create_dynamo_payload(self.envelope, latest_primary_bundles)
 
         self.assertEqual(payload['submission_id'], self.submission_id)
         self.assertEqual(payload['submission_date'], self.project['submission_date'])
@@ -144,7 +145,7 @@ class TestPayloadCreation(unittest.TestCase):
 
     def test_project_payload(self):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.project_uuid)
-        ingest_payload = ingest_dynamo_agent.create_dynamo_payload(self.envelope)
+        ingest_payload = ingest_dynamo_agent.create_dynamo_payload(self.envelope, latest_primary_bundles)
         azul_payload = azul_dynamo_agent.create_dynamo_payload(self.project_uuid, latest_primary_bundles, latest_analysis_bundles)
         dss_payload = dss_dynamo_agent.create_dynamo_payload(self.envelope)
         analysis_payload = analysis_dynamo_agent.create_dynamo_payload(self.envelope, latest_primary_bundles, azul_payload)

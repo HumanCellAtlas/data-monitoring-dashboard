@@ -54,7 +54,7 @@ class MatrixDynamoAgent(DynamoAgent):
             bundle_fqid = result[1]
             bundle_uuid = bundle_fqid.split('.')[0]
             bundle_version = bundle_fqid.split('.')[1]
-            expected_bundle_version = latest_analysis_bundles[bundle_uuid]['version']
+            expected_bundle_version = latest_analysis_bundles.get(bundle_uuid, {}).get('version', 'N/A')
             if bundle_version == expected_bundle_version:
                 bundle_uuids_indexed_on_latest.add(bundle_uuid)
             all_bundle_uuids_indexed.add(bundle_uuid)
