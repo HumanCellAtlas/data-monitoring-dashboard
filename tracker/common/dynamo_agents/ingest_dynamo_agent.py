@@ -1,3 +1,4 @@
+from collections import Counter
 import os
 
 from tracker.common.dynamo_agents.dynamo_agent import DynamoAgent
@@ -11,7 +12,7 @@ class IngestDynamoAgent(DynamoAgent):
         self.dynamo_table_name = f"dcp-data-dashboard-ingest-info-{deployment_stage}"
         self.table_display_name = "ingest-info"
 
-    def create_dynamo_payload(self, envelope):
+    def create_dynamo_payload(self, envelope, latest_primary_bundles, analysis_envelopes_map={}):
         print(f"creating ingest info payload for {envelope.submission_id}")
         payload = {}
         project = envelope.project()
@@ -28,7 +29,21 @@ class IngestDynamoAgent(DynamoAgent):
         payload['data_curator'] = project.data_curator
         primary_state = self._determine_state_of_primary_data(envelope.status)
         payload['primary_state'] = primary_state
+        envelope_statuses_count = self._aggregrate_analysis_envelopes_status_count(latest_primary_bundles, analysis_envelopes_map)
+        for status, count in envelope_statuses_count.items():
+            status_string = status + '_envelopes'
+            payload[status_string] = count
         return payload
+
+    def _aggregrate_analysis_envelopes_status_count(self, latest_primary_bundles, analysis_envelopes_map):
+        envelope_statuses_count = Counter()
+        envelope_statuses_count['Total'] = 0
+        for uuid, bundle in latest_primary_bundles.items():
+            statuses = analysis_envelopes_map.get(uuid, [])
+            for status in statuses:
+                envelope_statuses_count[status] += 1
+                envelope_statuses_count['Total'] += 1
+        return envelope_statuses_count
 
     def _determine_state_of_primary_data(self, envelope_status):
         if envelope_status != 'Complete':
