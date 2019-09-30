@@ -44,7 +44,7 @@ $(document).ready(function() {
 
         ingestInfo = val['ingest-info']
         ingestPrimaryState = ingestInfo['primary_state']
-        ingestAnalysisState = ingestInfo['analysis_state']
+        ingestAnalysisState = 'COMPLETE'
 
         azulInfo = val['azul-info']
         azulPrimaryState = azulInfo['primary_state']
@@ -126,7 +126,7 @@ $(document).ready(function() {
 
         var azulPrimaryBundleCount = azulInfo['primary_bundle_count']
         var azulAnalysisBundleCount = azulInfo['analysis_bundle_count']
-        azulPrimaryBundleCountDisplay = convertTextToDisplayDiv(azulPrimaryBundleCount, azulAnalysisState)
+        azulPrimaryBundleCountDisplay = convertTextToDisplayDiv(azulPrimaryBundleCount, azulPrimaryState)
         azulAnalysisBundleCountDisplay = convertTextToDisplayDiv(azulAnalysisBundleCount, azulAnalysisState)
 
         matrixInfo = val['matrix-info']

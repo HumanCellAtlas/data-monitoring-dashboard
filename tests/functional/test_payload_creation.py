@@ -98,7 +98,9 @@ class TestPayloadCreation(unittest.TestCase):
         self.assertEqual(payload['primary_state'], 'COMPLETE')
 
     def test_dss_payload(self):
-        payload = dss_dynamo_agent.create_dynamo_payload(self.envelope)
+        latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.project_uuid)
+        ingest_payload = ingest_dynamo_agent.create_dynamo_payload(self.envelope, latest_primary_bundles)
+        payload = dss_dynamo_agent.create_dynamo_payload(self.envelope, ingest_payload)
 
         self.assertEqual(payload['project_uuid'], self.project_uuid)
         self.assertEqual(payload['aws_primary_bundle_count'], self.project['phases']['primary']['bundle_count_expected'])
@@ -147,7 +149,7 @@ class TestPayloadCreation(unittest.TestCase):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.project_uuid)
         ingest_payload = ingest_dynamo_agent.create_dynamo_payload(self.envelope, latest_primary_bundles)
         azul_payload = azul_dynamo_agent.create_dynamo_payload(self.project_uuid, latest_primary_bundles, latest_analysis_bundles)
-        dss_payload = dss_dynamo_agent.create_dynamo_payload(self.envelope)
+        dss_payload = dss_dynamo_agent.create_dynamo_payload(self.envelope, ingest_payload)
         analysis_payload = analysis_dynamo_agent.create_dynamo_payload(self.envelope, latest_primary_bundles, azul_payload)
         matrix_payload = matrix_dynamo_agent.create_dynamo_payload(self.project_uuid, latest_analysis_bundles, azul_payload)
 
@@ -160,8 +162,9 @@ class TestPayloadCreation(unittest.TestCase):
         self.assertEqual(project_payload['matrix_state'], 'COMPLETE')
 
     def test_latest_primary_and_analysis_bundles_for_project__dss(self):
-        dss_payload = dss_dynamo_agent.create_dynamo_payload(self.updated_envelope)
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.updated_project_uuid)
+        ingest_payload = ingest_dynamo_agent.create_dynamo_payload(self.updated_envelope, latest_primary_bundles)
+        dss_payload = dss_dynamo_agent.create_dynamo_payload(self.updated_envelope, ingest_payload)
 
         self.assertEqual(dss_payload['project_uuid'], self.updated_project['project_uuid'])
         self.assertEqual(dss_payload['aws_primary_bundle_count'], self.updated_project['phases']['primary']['bundle_count_expected'])

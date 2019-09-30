@@ -1,5 +1,4 @@
 from collections import defaultdict
-import multiprocessing
 import os
 import signal
 import time
@@ -94,7 +93,7 @@ def track_envelope_data_moving_through_dcp(envelope, analysis_envelopes_map, fai
         analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(envelope,
                                                                                latest_primary_bundles,
                                                                                azul_project_payload)
-        dss_project_payload = dss_dynamo_agent.create_dynamo_payload(envelope)
+        dss_project_payload = dss_dynamo_agent.create_dynamo_payload(envelope, ingest_submission_payload)
         matrix_project_payload = matrix_dynamo_agent.create_dynamo_payload(project.uuid, latest_analysis_bundles, azul_project_payload)
         project_payload = project_dynamo_agent.create_dynamo_payload(ingest_submission_payload,
                                                                      dss_project_payload,
@@ -153,13 +152,13 @@ def main():
     failures = {}
     signal.signal(signal.SIGINT, _exit_on_signal)
     ingest_agent = IngestApiAgent(deployment=DEPLOYMENT_STAGE)
-    pool = ThreadPool(multiprocessing.cpu_count() * 4)
+    pool = ThreadPool()
 
     analysis_envelopes_map = defaultdict(list)
-    for envelope in SubmissionEnvelope.iter_submissions(ingest_api_agent=ingest_agent, page_size=1000, sort_by=None):
-        Statistics.increment('envelopes_retrieved')
-        pool.add_task(track_analysis_envelope, envelope, analysis_envelopes_map)
-    pool.wait_for_completion()
+    # for envelope in SubmissionEnvelope.iter_submissions(ingest_api_agent=ingest_agent, page_size=1000, sort_by=None):
+    #     Statistics.increment('envelopes_retrieved')
+    #     pool.add_task(track_analysis_envelope, envelope, analysis_envelopes_map)
+    # pool.wait_for_completion()
 
     failures = {}
     for envelope in SubmissionEnvelope.iter_submissions(ingest_api_agent=ingest_agent, page_size=1000, sort_by=None):
