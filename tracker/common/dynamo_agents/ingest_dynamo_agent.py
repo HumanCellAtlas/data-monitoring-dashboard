@@ -26,7 +26,7 @@ class IngestDynamoAgent(DynamoAgent):
         payload['submission_bundles_exported_count'] = envelope.bundle_count()
         # This submission has the incorrect bundle count but has been resolved. Manually overriding.
         if envelope.submission_id == '5cda8757d96dad000856d2ae':
-            payload['submission_bundles_exported_count'] = '3514'
+            payload['submission_bundles_exported_count'] = 3514
         payload['species'] = self._get_project_species(envelope)
         payload['library_construction_methods'] = self._get_project_library_construction_methods(envelope)
         payload['primary_investigator'] = project.primary_investigator

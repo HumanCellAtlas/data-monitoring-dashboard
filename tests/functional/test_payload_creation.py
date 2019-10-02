@@ -153,7 +153,7 @@ class TestPayloadCreation(unittest.TestCase):
         analysis_payload = analysis_dynamo_agent.create_dynamo_payload(self.envelope, latest_primary_bundles, azul_payload)
         matrix_payload = matrix_dynamo_agent.create_dynamo_payload(self.project_uuid, latest_analysis_bundles, azul_payload)
 
-        project_payload = project_dynamo_agent.create_dynamo_payload(ingest_payload, dss_payload, azul_payload, analysis_payload, matrix_payload)
+        project_payload = project_dynamo_agent.create_dynamo_payload([ingest_payload], dss_payload, azul_payload, analysis_payload, matrix_payload)
 
         self.assertEqual(project_payload['project_uuid'], self.project_uuid)
         self.assertEqual(project_payload['project_state'], 'COMPLETE')

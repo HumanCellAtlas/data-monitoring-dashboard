@@ -50,9 +50,9 @@ $(document).ready(function() {
         var submissionIds = ''
         var ingestInfo = ingestRecords[0]
         $.each(ingestRecords, function(key, val){
-            submissionIds = submissionIds + val['submission_id'] + '<br>'
             if(val['submission_id'] == projectInfo['latest_submission_id']){
                 submissionIds = submissionIds + '<b>' + val['submission_id'] + '</b><br>'
+                ingestInfo = val
             }
             else {
                 submissionIds = submissionIds + val['submission_id'] + '<br>'

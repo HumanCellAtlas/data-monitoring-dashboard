@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 import os
 
 from tracker.common.dynamo_agents.dynamo_agent import DynamoAgent
@@ -16,7 +17,7 @@ class ProjectDynamoAgent(DynamoAgent):
         payload = {}
         payload['project_uuid'] = dss_record['project_uuid']
 
-        latest_ingest_record = self._get_latest_ingest_record_and_lead_times(ingest_records)
+        latest_ingest_record, primary_lead_time, analysis_lead_time = self._get_latest_ingest_record_and_lead_times(ingest_records)
 
         primary_state = self._determine_project_primary_state(latest_ingest_record, dss_record, azul_record)
         analysis_state = self._determine_project_analysis_state(primary_state, dss_record, analysis_record, azul_record)
@@ -28,6 +29,8 @@ class ProjectDynamoAgent(DynamoAgent):
         payload['matrix_state'] = matrix_state
         payload['project_state'] = project_state
         payload['latest_submission_id'] = latest_ingest_record['submission_id']
+        payload['primary_lead_time'] = int(primary_lead_time)
+        payload['analysis_lead_time'] = int(analysis_lead_time)
 
         return payload
 
@@ -44,18 +47,17 @@ class ProjectDynamoAgent(DynamoAgent):
             elif submission_date <= first_submission_date:
                 first_record = record
                 first_submission_date = submission_date
-        if first_record:
-            primary_submission_date = first_record['submission_date']
-            primary_submission_dt = datetime.strptime(primary_submission_date, "%Y-%m-%dT%H:%M:%S.%fZ")
-            primary_update_date = first_record['update_date']
-            primary_update_dt = datetime.strptime(primary_update_date, "%Y-%m-%dT%H:%M:%S.%fZ")
-            last_analysis_update_date = first_record.get('latest_analysis_envelope_update_date')
-            primary_lead_time = (primary_update_dt - primary_submission_dt).total_seconds()
-            if last_analysis_update_date != 'N/A':
-                last_analysis_update_dt = datetime.strptime(last_analysis_update_date, "%Y-%m-%dT%H:%M:%S.%fZ")
-                analysis_lead_time = (last_analysis_update_dt - primary_submission_dt).total_seconds()
-            else:
-                analysis_lead_time = 0
+        primary_submission_date = first_record['submission_date']
+        primary_submission_dt = datetime.strptime(primary_submission_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        primary_update_date = first_record['update_date']
+        primary_update_dt = datetime.strptime(primary_update_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        last_analysis_update_date = first_record.get('latest_analysis_envelope_update_date')
+        primary_lead_time = (primary_update_dt - primary_submission_dt).total_seconds()
+        if last_analysis_update_date != 'N/A':
+            last_analysis_update_dt = datetime.strptime(last_analysis_update_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+            analysis_lead_time = (last_analysis_update_dt - primary_submission_dt).total_seconds()
+        else:
+            analysis_lead_time = 0
         return last_record, primary_lead_time, analysis_lead_time
 
     def _determine_project_primary_state(self, ingest_record, dss_record, azul_record):
