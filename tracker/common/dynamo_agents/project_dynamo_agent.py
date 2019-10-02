@@ -58,9 +58,10 @@ class ProjectDynamoAgent(DynamoAgent):
                 analysis_lead_time = 0
         return last_record, primary_lead_time, analysis_lead_time
 
-
     def _determine_project_primary_state(self, ingest_record, dss_record, azul_record):
-        if ingest_record['primary_state'] == 'INCOMPLETE' or dss_record['primary_state'] == 'INCOMPLETE' or azul_record['primary_state'] == 'INCOMPLETE':
+        if (ingest_record['primary_state'] == 'INCOMPLETE' or
+                dss_record['primary_state'] == 'INCOMPLETE' or
+                azul_record['primary_state'] == 'INCOMPLETE'):
             return 'INCOMPLETE'
         elif azul_record['primary_state'] == 'OUT_OF_DATE':
             return 'OUT_OF_DATE'

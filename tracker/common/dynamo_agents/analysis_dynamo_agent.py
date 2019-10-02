@@ -76,9 +76,6 @@ class AnalysisDynamoAgent(DynamoAgent):
             return 'NOT_EXPECTED'
         elif len(input_bundle_uuids_with_successful_workflows) != workflows_expected:
             return 'INCOMPLETE'
-        ## This is temporary commented out since there is no such thing as a workflow running after AUDR right now.
-        # elif len(latest_input_bundle_versions_with_successful_workflows) != workflows_expected:
-        #     return 'OUT_OF_DATE'
         else:
             return 'COMPLETE'
 

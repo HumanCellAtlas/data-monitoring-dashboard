@@ -113,13 +113,13 @@ def track_envelope_data_moving_through_dcp(envelope, analysis_envelopes_map, fai
         Statistics.increment('error_while_tracking')
 
 
-def track_analysis_envelope(envelope):
+def track_analysis_envelope(envelope, failures):
     if envelope.submission_date < SUBMISSION_DATE_CUTOFF:
         Statistics.increment('envelope_too_old')
         return
 
     try:
-        project = envelope.project()
+        envelope.project()
         return
     except RuntimeError:
         Statistics.increment('analysis_envelope')
@@ -173,7 +173,7 @@ def main():
         Statistics.increment('envelopes_retrieved')
         if ANALYSIS_ENVELOPE_COLLECTION_JOB:
             # ONLY SAVE PAYLOADS CORRESPONDING WITH ENVELOPES FOR WORKFLOWS. WILL RUN TWICE A DAY.
-            pool.add_task(track_analysis_envelope, envelope)
+            pool.add_task(track_analysis_envelope, envelope, failures)
         else:
             # REFRESH DATA FROM ALL COMPONENTS FOR ALL EXISTING AND NEW PROJECTS. RUNS ONCE AN HOUR.
             pool.add_task(track_envelope_data_moving_through_dcp, envelope, analysis_envelopes_map, failures)
@@ -181,7 +181,6 @@ def main():
 
     if not ANALYSIS_ENVELOPE_COLLECTION_JOB:
         create_overall_project_payloads()
-
 
     Statistics.report(force=True)
     print(f"{len(failures)} projects failed during refresh")
