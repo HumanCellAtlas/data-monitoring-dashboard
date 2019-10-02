@@ -6,24 +6,25 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.foundation.min.css">
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="tracker-table.js"></script>
+<script src="tracker-dashboard.js"></script>
 <div class="lds-ring"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
 <table id="tracker" class="display hover" style="display:none">
         <thead>
             <tr>
-                <th colspan="6">Project Info</th>
+                <th colspan="7">Project Info</th>
                 <th colspan="4">Primary Data</th>
                 <th colspan="8">Analysis Data</th>
             </tr>
             <tr>
                 <th>Project Title</th>
-                <th>Submission Date</th>
+                <th>Overall Project State</th>
+                <th>Latest Ingest Submission Date</th>
                 <th>Project UUID</th>
-                <th>Ingest Submission Id</th>
+                <th>Ingest Submission Ids (Latest bolded)</th>
                 <th>Species</th>
                 <th>Method</th>
-                <th>Ingest Submission Status</th>
-                <th>Ingest Primary Bundles Exported</th>
+                <th>Latest Ingest Submission Status</th>
+                <th>Latest Ingest Primary Bundles Exported</th>
                 <th>DSS Primary Bundles</th>
                 <th>Azul Primary Bundles</th>
                 <th>Analysis Workflows By Status</th>
@@ -39,13 +40,14 @@
         <tfoot>
             <tr>
                 <th>Project Title</th>
-                <th>Submission Date</th>
+                <th>Overall Project State</th>
+                <th>Latest Ingest Submission Date</th>
                 <th>Project UUID</th>
-                <th>Ingest Submission Id</th>
+                <th>Ingest Submission Ids (Latest bolded)</th>
                 <th>Species</th>
-                <th>Methods</th>
-                <th>Ingest Submission Status</th>
-                <th>Ingest Primary Bundles Exported</th>
+                <th>Method</th>
+                <th>Latest Ingest Submission Status</th>
+                <th>Latest Ingest Primary Bundles Exported</th>
                 <th>DSS Primary Bundles</th>
                 <th>Azul Primary Bundles</th>
                 <th>Analysis Workflows By Status</th>

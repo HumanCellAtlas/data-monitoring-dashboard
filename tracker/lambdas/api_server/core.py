@@ -39,6 +39,9 @@ def get_project(project_uuid):
 def _parse_by_project_uuid(target_project_dict, source_records_list, table_name):
     for record in source_records_list:
         project_uuid = record['project_uuid']
-        target_project_dict[project_uuid][table_name] = record
+        if target_project_dict[project_uuid].get(table_name):
+            target_project_dict[project_uuid][table_name].append(record)
+        else:
+            target_project_dict[project_uuid][table_name] = [record]
 
     return target_project_dict
