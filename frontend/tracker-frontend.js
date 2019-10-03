@@ -42,23 +42,38 @@ $(document).ready(function() {
       $.each( data, function(key, val) {
         var projectUUID = val['project_uuid']
 
-        ingestInfo = val['ingest-info']
-        ingestPrimaryState = ingestInfo['primary_state']
-        ingestAnalysisState = 'COMPLETE'
+        projectInfo = val['project-info'][0]
+        overallProjectState = projectInfo['project_state']
+        overallProjectStateDisplay = convertTextToDisplayDiv(overallProjectState, overallProjectState)
 
-        azulInfo = val['azul-info']
-        azulPrimaryState = azulInfo['primary_state']
-        azulAnalysisState = azulInfo['analysis_state']
+        var ingestRecords = val['ingest-info']
+        var submissionIds = ''
+        var ingestInfo = ingestRecords[0]
+        $.each(ingestRecords, function(key, val){
+            if(val['submission_id'] == projectInfo['latest_submission_id']){
+                submissionIds = submissionIds + '<b>' + val['submission_id'] + '</b><br>'
+                ingestInfo = val
+            }
+            else {
+                submissionIds = submissionIds + val['submission_id'] + '<br>'
+            }
+        })
+        var ingestPrimaryState = ingestInfo['primary_state']
+        var ingestAnalysisState = 'COMPLETE'
 
-        dssInfo = val['dss-info']
-        dssPrimaryState = dssInfo['primary_state']
-        dssAnalysisState = dssInfo['analysis_state']
+        var azulInfo = val['azul-info'][0]
+        var azulPrimaryState = azulInfo['primary_state']
+        var azulAnalysisState = azulInfo['analysis_state']
 
-        matrixInfo = val['matrix-info']
-        matrixAnalysisState = matrixInfo['analysis_state']
+        var dssInfo = val['dss-info'][0]
+        var dssPrimaryState = dssInfo['primary_state']
+        var dssAnalysisState = dssInfo['analysis_state']
 
-        analysisInfo = val['analysis-info']
-        analysisAnalysisState = analysisInfo['analysis_state']
+        var matrixInfo = val['matrix-info'][0]
+        var matrixAnalysisState = matrixInfo['analysis_state']
+
+        var analysisInfo = val['analysis-info'][0]
+        var analysisAnalysisState = analysisInfo['analysis_state']
 
         // PROJECT INFO DISPLAY
         var lastUpdatedAt = new Date(azulInfo['updated_at']).toLocaleString()
@@ -77,10 +92,6 @@ $(document).ready(function() {
         var submissionStatusDisplay = convertTextToDisplayDiv(submissionStatus, ingestPrimaryState)
 
         var ingestPrimaryBundleCount = ingestInfo['submission_bundles_exported_count']
-        // This submission has the incorrect bundle count but has been resolved. Manually overriding.
-        if(submissionId == '5cda8757d96dad000856d2ae'){
-            ingestPrimaryBundleCount = '3514'
-        }
         ingestPrimaryBundleCountDisplay = convertTextToDisplayDiv(ingestPrimaryBundleCount, ingestPrimaryState)
 
         var dssAwsPrimaryBundleCount = dssInfo['aws_primary_bundle_count']
@@ -129,7 +140,6 @@ $(document).ready(function() {
         azulPrimaryBundleCountDisplay = convertTextToDisplayDiv(azulPrimaryBundleCount, azulPrimaryState)
         azulAnalysisBundleCountDisplay = convertTextToDisplayDiv(azulAnalysisBundleCount, azulAnalysisState)
 
-        matrixInfo = val['matrix-info']
         var matrixAnalysisBundleCount = matrixInfo['analysis_bundle_count']
         var matrixCellCount = matrixInfo['cell_count']
         matrixAnalysisBundleCountDisplay = convertTextToDisplayDiv(matrixAnalysisBundleCount, matrixAnalysisState)
@@ -137,9 +147,10 @@ $(document).ready(function() {
 
         var project = [
             projectTitle,
+            overallProjectStateDisplay,
             smallText(submissionDate),
             smallText(projectUUID),
-            smallText(submissionId),
+            smallText(submissionIds),
             smallText(species),
             smallText(methods),
             submissionStatusDisplay,
@@ -190,13 +201,13 @@ $(document).ready(function() {
         oSearch: {"sSearch": getUrlParam('projectUUID', '')},
         paging: false,
         data: dataSet,
-        order: [[ 1, "desc" ]],
+        order: [[ 2, "desc" ]],
         columnDefs: [
             {
-               targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+               targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
                className: 'dt-left'
             },
-            { type: 'num-html', targets: [7, 9, 13, 14, 15] }
+            { type: 'num-html', targets: [8, 10, 14, 15, 16] }
         ],
         drawCallback: function( settings ) {
             $('.red').parent('.dt-left').css('background', '#f5dad6');

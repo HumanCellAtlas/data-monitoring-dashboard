@@ -31,6 +31,43 @@ resource "aws_ecs_task_definition" "data_refresher" {
 DEFINITION
 }
 
+resource "aws_ecs_task_definition" "analysis_envelope_refresher" {
+  family                = "data-monitoring-analysis-envelope-refresher-${var.deployment_stage}"
+  requires_compatibilities = ["FARGATE"]
+  execution_role_arn = "${aws_iam_role.task_executor.arn}"
+  task_role_arn = "${aws_iam_role.data_refresher.arn}"
+  cpu = "4096"
+  memory = "8192"
+  network_mode = "awsvpc"
+  container_definitions = <<DEFINITION
+[
+  {
+    "environment": [
+      {
+        "name": "DEPLOYMENT_STAGE",
+        "value": "${var.deployment_stage}"
+      },
+      {
+        "name": "ANALYSIS_ENVELOPE_COLLECTION_JOB",
+        "value": "TRUE"
+      }
+    ],
+    "image": "${var.data_refresher_image}",
+    "name": "data-monitoring-data-refresher-${var.deployment_stage}",
+    "essential": true,
+    "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "${aws_cloudwatch_log_group.data_refresher.name}",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+    }
+  }
+]
+DEFINITION
+}
+
 resource "aws_cloudwatch_log_group" "data_refresher" {
   name              = "/aws/service/data-monitoring-data-refresher-${var.deployment_stage}"
   retention_in_days = 1827
@@ -156,9 +193,7 @@ resource "aws_iam_role_policy" "data_refresher" {
           "Sid": "DynamoPolicy",
           "Effect": "Allow",
           "Action": [
-            "dynamodb:UpdateItem",
-            "dynamodb:GetItem",
-            "dynamodb:PutItem"
+            "dynamodb:*"
           ],
           "Resource": [
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-ingest-info-${var.deployment_stage}",
@@ -166,7 +201,8 @@ resource "aws_iam_role_policy" "data_refresher" {
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-azul-info-${var.deployment_stage}",
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-analysis-info-${var.deployment_stage}",
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-dss-info-${var.deployment_stage}",
-            "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-project-info-${var.deployment_stage}"
+            "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-project-info-${var.deployment_stage}",
+            "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-ingest-analysis-envelopes-info-${var.deployment_stage}"
           ]
         }
     ]
@@ -196,7 +232,7 @@ resource "aws_cloudwatch_event_rule" "data_refresher" {
   schedule_expression = "${var.refresher_schedule_expression}"
 }
 
-resource "aws_cloudwatch_event_target" "scheduled_task" {
+resource "aws_cloudwatch_event_target" "data_refresher_scheduled_task" {
   rule      = "${aws_cloudwatch_event_rule.data_refresher.name}"
   arn       = "${aws_ecs_cluster.data_refresher.arn}"
   role_arn  = "${aws_iam_role.task_executor.arn}"
@@ -204,6 +240,31 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
   ecs_target = {
     task_count          = 1
     task_definition_arn = "${aws_ecs_task_definition.data_refresher.arn}"
+    launch_type         = "FARGATE"
+    platform_version    = "LATEST"
+
+    network_configuration {
+      security_groups = ["${var.security_group_id}"]
+      subnets         = ["${var.allowed_subnet_ids}"]
+      assign_public_ip = true
+    }
+  }
+}
+
+resource "aws_cloudwatch_event_rule" "analysis_envelope_refresher" {
+  name                = "tracker-analysis-envelope-refresher-cron-rule-${var.deployment_stage}"
+  description         = "Runs fargate task data monitoring analysis envelope refresher with a cron rule"
+  schedule_expression = "rate(12 hours)"
+}
+
+resource "aws_cloudwatch_event_target" "analysis_envelope_refresher_scheduled_task" {
+  rule      = "${aws_cloudwatch_event_rule.analysis_envelope_refresher.name}"
+  arn       = "${aws_ecs_cluster.data_refresher.arn}"
+  role_arn  = "${aws_iam_role.task_executor.arn}"
+
+  ecs_target = {
+    task_count          = 1
+    task_definition_arn = "${aws_ecs_task_definition.analysis_envelope_refresher.arn}"
     launch_type         = "FARGATE"
     platform_version    = "LATEST"
 

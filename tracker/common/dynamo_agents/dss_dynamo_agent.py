@@ -20,16 +20,23 @@ class DSSDynamoAgent(DynamoAgent):
     def create_dynamo_payload(self, envelope, ingest_payload):
         project_uuid = envelope.project().uuid
         print(f"creating dss info payload for {project_uuid}")
-        primary_aws_bundles = self.dss_agent.get_primary_bundles_for_project(project_uuid, 'aws')
-        analysis_aws_bundles = self.dss_agent.get_analysis_bundles_for_project(project_uuid, 'aws')
-        primary_gcp_bundles = self.dss_agent.get_primary_bundles_for_project(project_uuid, 'gcp')
-        analysis_gcp_bundles = self.dss_agent.get_analysis_bundles_for_project(project_uuid, 'gcp')
+        latest_aws_primary_bundles, latest_aws_analysis_bundles = self.latest_primary_and_analysis_bundles_for_project(project_uuid)
+        latest_gcp_primary_bundles, latest_gcp_analysis_bundles = self.latest_primary_and_analysis_bundles_for_project(project_uuid,
+                                                                                                                       'gcp')
+        primary_aws_bundle_fqids = self.dss_agent.get_primary_bundles_for_project(project_uuid, 'aws')
+        analysis_aws_bundle_fqids = self.dss_agent.get_analysis_bundles_for_project(project_uuid, 'aws')
+        primary_gcp_bundle_fqids = self.dss_agent.get_primary_bundles_for_project(project_uuid, 'gcp')
+        analysis_gcp_bundle_fqids = self.dss_agent.get_analysis_bundles_for_project(project_uuid, 'gcp')
         payload = {}
         payload['project_uuid'] = project_uuid
-        payload['aws_primary_bundle_count'] = len(primary_aws_bundles)
-        payload['aws_analysis_bundle_count'] = len(analysis_aws_bundles)
-        payload['gcp_primary_bundle_count'] = len(primary_gcp_bundles)
-        payload['gcp_analysis_bundle_count'] = len(analysis_gcp_bundles)
+        payload['aws_primary_bundle_count'] = len(latest_aws_primary_bundles)
+        payload['aws_analysis_bundle_count'] = len(latest_aws_analysis_bundles)
+        payload['gcp_primary_bundle_count'] = len(latest_gcp_primary_bundles)
+        payload['gcp_analysis_bundle_count'] = len(latest_gcp_analysis_bundles)
+        payload['aws_primary_bundle_fqids_count'] = len(primary_aws_bundle_fqids)
+        payload['aws_analysis_bundle_fqids_count'] = len(analysis_aws_bundle_fqids)
+        payload['gcp_primary_bundle_fqids_count'] = len(primary_gcp_bundle_fqids)
+        payload['gcp_analysis_bundle_fqids_count'] = len(analysis_gcp_bundle_fqids)
         payload['primary_state'] = self._determine_primary_state(project_uuid, payload, ingest_payload)
         payload['analysis_state'] = self._determine_analysis_state(project_uuid, payload)
         return payload
@@ -61,7 +68,7 @@ class DSSDynamoAgent(DynamoAgent):
     def _determine_primary_state(self, project_uuid, dss_payload, ingest_payload):
         if ingest_payload['submission_bundles_exported_count'] == 0:
             primary_state = 'INCOMPLETE'
-        elif dss_payload['aws_primary_bundle_count'] % ingest_payload['submission_bundles_exported_count'] != 0:
+        elif ingest_payload['submission_bundles_exported_count'] % dss_payload['aws_primary_bundle_count'] != 0:
             primary_state = 'INCOMPLETE'
         elif dss_payload['aws_primary_bundle_count'] != dss_payload['gcp_primary_bundle_count']:
             primary_state = 'INCOMPLETE'

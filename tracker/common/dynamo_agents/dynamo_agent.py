@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 from datetime import datetime
 
 import boto3
@@ -32,12 +33,23 @@ class DynamoAgent:
         return payload
 
     def get_all_items(self):
+        all_results = []
         table = DYNAMO.Table(self.dynamo_table_name)
-        results = table.scan()
-        if table.item_count > len(results['Items']):
-            raise Exception(f"Table scan for {self.dynamo_table_name} did not retrieve complete results")
-        payload = {'records': results['Items'], 'table_name': self.table_display_name}
+        scan_results = table.scan()
+        all_results = all_results + scan_results['Items']
+        while scan_results.get('LastEvaluatedKey'):
+            scan_results = table.scan(ExclusiveStartKey=scan_results['LastEvaluatedKey'])
+            all_results = all_results + scan_results['Items']
+        payload = {'records': all_results, 'table_name': self.table_display_name}
         return payload
+
+    def create_project_map(self):
+        project_map = defaultdict(list)
+        records = self.get_all_items()['records']
+        for record in records:
+            project_uuid = record['project_uuid']
+            project_map[project_uuid].append(record)
+        return project_map
 
     def create_dynamo_payload(self, *args, **kwargs):
         raise Exception("func create_dynamo_payload not implemented in child class")

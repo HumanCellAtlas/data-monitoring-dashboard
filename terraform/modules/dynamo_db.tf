@@ -1,11 +1,23 @@
+resource "aws_dynamodb_table" "ingest-analysis-envelopes" {
+  name           = "dcp-data-dashboard-ingest-analysis-envelopes-info-${var.deployment_stage}"
+  read_capacity  = 25
+  write_capacity = 25
+  hash_key       = "submission_id"
+
+  attribute {
+    name = "submission_id"
+    type = "S"
+  }
+}
+
 resource "aws_dynamodb_table" "ingest_tracking_stats" {
   name           = "dcp-data-dashboard-ingest-info-${var.deployment_stage}"
   read_capacity  = 25
   write_capacity = 25
-  hash_key       = "project_uuid"
+  hash_key       = "submission_id"
 
   attribute {
-    name = "project_uuid"
+    name = "submission_id"
     type = "S"
   }
 }

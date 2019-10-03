@@ -21,7 +21,8 @@
         "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-azul-info-${DEPLOYMENT_STAGE}",
         "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-dss-info-${DEPLOYMENT_STAGE}",
         "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-analysis-info-${DEPLOYMENT_STAGE}",
-        "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-project-info-${DEPLOYMENT_STAGE}"
+        "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-project-info-${DEPLOYMENT_STAGE}",
+        "arn:aws:dynamodb:us-east-1:${account_id}:table/dcp-data-dashboard-ingest-analysis-envelopes-info-${DEPLOYMENT_STAGE}"
       ]
     },
     {
