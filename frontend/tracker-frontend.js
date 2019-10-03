@@ -36,11 +36,20 @@ $(document).ready(function() {
         projectTrackerUrl = currentUrl + '?projectUUID=' + projectUUID
         return projectTrackerUrl
     }
+    function getProjectBrowserUrl(projectUUID){
+        urlBase = location.host.split('.').slice(1).join('.')
+        return location.protocol + '//' + urlBase + '/explore/projects/' + projectUUID
+    }
+    function getSubmissionIngestApiUrl(submissionId){
+        urlBase = location.host.split('.').slice(1).join('.')
+        return location.protocol + '//api.ingest.' + urlBase + '/submissionEnvelopes/' + submissionId
+    }
     var dataSet = []
     projectsApiEndpoint = getTrackerApiUrl() + 'v0/projects'
     $.getJSON(projectsApiEndpoint, function(data) {
       $.each( data, function(key, val) {
         var projectUUID = val['project_uuid']
+        var projectUUIDDisplay = "<a target='_blank' href='" + getProjectBrowserUrl(projectUUID) + "'>" + projectUUID + "</a>"
 
         projectInfo = val['project-info'][0]
         overallProjectState = projectInfo['project_state']
@@ -50,12 +59,14 @@ $(document).ready(function() {
         var submissionIds = ''
         var ingestInfo = ingestRecords[0]
         $.each(ingestRecords, function(key, val){
-            if(val['submission_id'] == projectInfo['latest_submission_id']){
-                submissionIds = submissionIds + '<b>' + val['submission_id'] + '</b><br>'
+            var submissionId = val['submission_id']
+            var submissionIdDisplay = "<a target='_blank' href='" + getSubmissionIngestApiUrl(submissionId) + "'>" + submissionId + "</a>"
+            if(submissionId == projectInfo['latest_submission_id']){
+                submissionIds = submissionIds + '<b>' + submissionIdDisplay + '</b><br>'
                 ingestInfo = val
             }
             else {
-                submissionIds = submissionIds + val['submission_id'] + '<br>'
+                submissionIds = submissionIds + submissionIdDisplay + '<br>'
             }
         })
         var ingestPrimaryState = ingestInfo['primary_state']
@@ -155,7 +166,7 @@ $(document).ready(function() {
             projectTitle,
             overallProjectStateDisplay,
             smallText(submissionDate),
-            smallText(projectUUID),
+            smallText(projectUUIDDisplay),
             smallText(submissionIds),
             smallText(species),
             smallText(methods),
