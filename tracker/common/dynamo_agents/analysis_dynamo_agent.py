@@ -46,6 +46,9 @@ class AnalysisDynamoAgent(DynamoAgent):
                                                                        envelope,
                                                                        project_uuid,
                                                                        azul_project_info)
+        payload['failures_present'] = False
+        if payload.get('failed_workflows'):
+            payload['failures_present'] = True
         return payload
 
     def _determine_state_of_workflows(self, workflows, latest_primary_bundles, envelope, project_uuid, azul_info):

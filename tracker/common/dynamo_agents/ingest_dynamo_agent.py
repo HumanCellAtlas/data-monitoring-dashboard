@@ -31,18 +31,21 @@ class IngestDynamoAgent(DynamoAgent):
         payload['library_construction_methods'] = self._get_project_library_construction_methods(envelope)
         payload['primary_investigator'] = project.primary_investigator
         payload['data_curator'] = project.data_curator
-        payload['failures_present'] = len(envelope.submission_errors()) > 0
         primary_state = self._determine_state_of_primary_data(envelope.status)
         payload['primary_state'] = primary_state
-        envelope_statuses_count, latest_analysis_envelope_update_date = self._aggregrate_analysis_envelopes_stats(latest_primary_bundles,
-                                                                                                                  analysis_envelopes_map)
-        for status, count in envelope_statuses_count.items():
+
+        envelope_status_map, envelope_failed, latest_envelope_dt = self._aggregrate_analysis_envelopes_stats(latest_primary_bundles,
+                                                                                                             analysis_envelopes_map)
+        for status, count in envelope_status_map.items():
             status_string = status + '_envelopes'
             payload[status_string] = count
-        payload['latest_analysis_envelope_update_date'] = latest_analysis_envelope_update_date
+        payload['failures_present'] = len(envelope.submission_errors()) > 0 or envelope_failed
+        payload['latest_analysis_envelope_update_date'] = latest_envelope_dt
+
         return payload
 
     def _aggregrate_analysis_envelopes_stats(self, latest_primary_bundles, analysis_envelopes_map):
+        envelope_failures_present = False
         latest_analysis_envelope_update_date = ''
         envelope_statuses_count = Counter()
         envelope_statuses_count['Total'] = 0
@@ -51,12 +54,14 @@ class IngestDynamoAgent(DynamoAgent):
             for envelope in envelopes:
                 if envelope['update_date'] > latest_analysis_envelope_update_date:
                     latest_analysis_envelope_update_date = envelope['update_date']
+                if len(envelope.submission_errors()) > 0:
+                    envelope_failures_present = True
                 status = envelope['submission_status']
                 envelope_statuses_count[status] += 1
                 envelope_statuses_count['Total'] += 1
         if latest_analysis_envelope_update_date == '':
             latest_analysis_envelope_update_date = 'N/A'
-        return envelope_statuses_count, latest_analysis_envelope_update_date
+        return envelope_statuses_count, envelope_failures_present, latest_analysis_envelope_update_date
 
     def _determine_state_of_primary_data(self, envelope_status):
         if envelope_status != 'Complete':

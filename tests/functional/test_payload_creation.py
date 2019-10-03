@@ -56,7 +56,7 @@ PROJECT_UPDATE_FIXTURE = {
             'phases': {
                 'primary': {
                     'bundle_fqids_count_expected': 235,
-                    'latest_bundle_count_expected': 47
+                    'latest_bundle_count_expected': 47,
                 },
                 'analysis': {
                     'bundle_fqids_count_expected': 188,
@@ -100,6 +100,7 @@ class TestPayloadCreation(unittest.TestCase):
         self.assertEqual(payload['primary_investigator'], self.project['primary_investigator'])
         self.assertEqual(payload['data_curator'], self.project['data_curator'])
         self.assertEqual(payload['primary_state'], 'COMPLETE')
+        self.assertEqual(payload['failures_present'], False)
 
     def test_dss_payload(self):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.project_uuid)
@@ -128,6 +129,7 @@ class TestPayloadCreation(unittest.TestCase):
         self.assertEqual(payload['succeeded_workflows'], self.project['phases']['analysis']['workflow_count_expected'])
         self.assertEqual(payload['total_workflows'], self.project['phases']['analysis']['workflow_count_expected'])
         self.assertEqual(payload['analysis_state'], 'COMPLETE')
+        self.assertEqual(payload['failures_present'], False)
 
     def test_matrix_payload(self):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.project_uuid)
@@ -168,6 +170,7 @@ class TestPayloadCreation(unittest.TestCase):
         self.assertEqual(project_payload['primary_state'], 'COMPLETE')
         self.assertEqual(project_payload['analysis_state'], 'COMPLETE')
         self.assertEqual(project_payload['matrix_state'], 'COMPLETE')
+        self.assertEqual(project_payload['failures_present'], False)
 
     def test_latest_primary_and_analysis_bundles_for_project__dss(self):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.updated_project_uuid)
@@ -199,6 +202,7 @@ class TestPayloadCreation(unittest.TestCase):
         analysis_payload = analysis_dynamo_agent.create_dynamo_payload(self.updated_envelope, latest_primary_bundles, azul_payload)
 
         self.assertEqual(analysis_payload['analysis_state'], 'COMPLETE')
+        self.assertEqual(analysis_payload['failures_present'], True)
 
     def test_latest_primary_and_analysis_bundles_for_project__matrix(self):
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(self.updated_project_uuid)
