@@ -17,7 +17,7 @@ class ProjectDynamoAgent(DynamoAgent):
         payload = {}
         payload['project_uuid'] = dss_record['project_uuid']
 
-        first_ingest_record, last_ingest_record, primary_lead_time, analysis_lead_time = self._get_first_last_ingest_record_and_project_lead_times(ingest_records)
+        first_ingest_record, last_ingest_record, primary_time, analysis_time = self._parse_ingest_records_and_project_lead_times(ingest_records)
 
         primary_state = self._determine_project_primary_state(last_ingest_record, dss_record, azul_record)
         analysis_state = self._determine_project_analysis_state(primary_state, dss_record, analysis_record, azul_record)
@@ -30,13 +30,13 @@ class ProjectDynamoAgent(DynamoAgent):
         payload['project_state'] = project_state
         payload['latest_submission_id'] = last_ingest_record['submission_id']
         payload['initial_submission_id'] = first_ingest_record['submission_id']
-        payload['primary_lead_time'] = int(primary_lead_time)
-        payload['analysis_lead_time'] = int(analysis_lead_time)
+        payload['primary_lead_time'] = int(primary_time)
+        payload['analysis_lead_time'] = int(analysis_time)
         payload['failures_present'] = self._determine_if_failures_present(ingest_records, analysis_record)
 
         return payload
 
-    def _get_first_last_ingest_record_and_project_lead_times(self, ingest_records):
+    def _parse_ingest_records_and_project_lead_times(self, ingest_records):
         last_submission_date = ingest_records[0]['submission_date']
         last_record = ingest_records[0]
         first_submission_date = ingest_records[0]['submission_date']
@@ -65,9 +65,9 @@ class ProjectDynamoAgent(DynamoAgent):
     def _determine_if_failures_present(self, ingest_records, analysis_record):
         failures_present = False
         for record in ingest_records:
-            if record['failures_present'] == True:
+            if record['failures_present']:
                 failures_present = True
-        if analysis_record['failures_present'] == True:
+        if analysis_record['failures_present']:
             failures_present = True
         return failures_present
 
