@@ -193,9 +193,7 @@ resource "aws_iam_role_policy" "data_refresher" {
           "Sid": "DynamoPolicy",
           "Effect": "Allow",
           "Action": [
-            "dynamodb:UpdateItem",
-            "dynamodb:GetItem",
-            "dynamodb:PutItem"
+            "dynamodb:*"
           ],
           "Resource": [
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-ingest-info-${var.deployment_stage}",

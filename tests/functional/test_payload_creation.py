@@ -55,7 +55,11 @@ PROJECT_UPDATE_FIXTURE = {
             'submission_id': '5d51692a1a249400085ac36a',
             'phases': {
                 'primary': {
-                    'bundle_count_expected': 94,
+                    'bundle_fqids_count_expected': 235,
+                    'latest_bundle_count_expected': 47
+                },
+                'analysis': {
+                    'bundle_fqids_count_expected': 188,
                     'latest_bundle_count_expected': 47
                 }
             }
@@ -107,6 +111,10 @@ class TestPayloadCreation(unittest.TestCase):
         self.assertEqual(payload['gcp_primary_bundle_count'], self.project['phases']['primary']['bundle_count_expected'])
         self.assertEqual(payload['aws_analysis_bundle_count'], self.project['phases']['analysis']['bundle_count_expected'])
         self.assertEqual(payload['aws_analysis_bundle_count'], self.project['phases']['analysis']['bundle_count_expected'])
+        self.assertEqual(payload['aws_primary_bundle_fqids_count'], self.project['phases']['primary']['bundle_count_expected'])
+        self.assertEqual(payload['gcp_primary_bundle_fqids_count'], self.project['phases']['primary']['bundle_count_expected'])
+        self.assertEqual(payload['aws_analysis_bundle_fqids_count'], self.project['phases']['analysis']['bundle_count_expected'])
+        self.assertEqual(payload['aws_analysis_bundle_fqids_count'], self.project['phases']['analysis']['bundle_count_expected'])
         self.assertEqual(payload['primary_state'], 'COMPLETE')
         self.assertEqual(payload['analysis_state'], 'COMPLETE')
 
@@ -167,8 +175,14 @@ class TestPayloadCreation(unittest.TestCase):
         dss_payload = dss_dynamo_agent.create_dynamo_payload(self.updated_envelope, ingest_payload)
 
         self.assertEqual(dss_payload['project_uuid'], self.updated_project['project_uuid'])
-        self.assertEqual(dss_payload['aws_primary_bundle_count'], self.updated_project['phases']['primary']['bundle_count_expected'])
-        self.assertEqual(dss_payload['gcp_primary_bundle_count'], self.updated_project['phases']['primary']['bundle_count_expected'])
+        self.assertEqual(dss_payload['aws_primary_bundle_count'], self.updated_project['phases']['primary']['latest_bundle_count_expected'])
+        self.assertEqual(dss_payload['gcp_primary_bundle_count'], self.updated_project['phases']['primary']['latest_bundle_count_expected'])
+        self.assertEqual(dss_payload['aws_analysis_bundle_count'], self.updated_project['phases']['analysis']['latest_bundle_count_expected'])
+        self.assertEqual(dss_payload['gcp_analysis_bundle_count'], self.updated_project['phases']['analysis']['latest_bundle_count_expected'])
+        self.assertEqual(dss_payload['aws_primary_bundle_fqids_count'], self.updated_project['phases']['primary']['bundle_fqids_count_expected'])
+        self.assertEqual(dss_payload['gcp_primary_bundle_fqids_count'], self.updated_project['phases']['primary']['bundle_fqids_count_expected'])
+        self.assertEqual(dss_payload['aws_analysis_bundle_fqids_count'], self.updated_project['phases']['analysis']['bundle_fqids_count_expected'])
+        self.assertEqual(dss_payload['gcp_analysis_bundle_fqids_count'], self.updated_project['phases']['analysis']['bundle_fqids_count_expected'])
         self.assertEqual(len(latest_primary_bundles), self.updated_project['phases']['primary']['latest_bundle_count_expected'])
 
     def test_latest_primary_and_analysis_bundles_for_project__azul(self):
@@ -192,4 +206,4 @@ class TestPayloadCreation(unittest.TestCase):
 
         matrix_payload = matrix_dynamo_agent.create_dynamo_payload(self.updated_project_uuid, latest_analysis_bundles, azul_payload)
 
-        self.assertEqual(matrix_payload['analysis_state'], 'COMPLETE')
+        self.assertEqual(matrix_payload['analysis_state'], 'OUT_OF_DATE')
