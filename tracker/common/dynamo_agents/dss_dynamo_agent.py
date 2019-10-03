@@ -66,7 +66,7 @@ class DSSDynamoAgent(DynamoAgent):
         return latest_primary_bundles, latest_analysis_bundles
 
     def _determine_primary_state(self, project_uuid, dss_payload, ingest_payload):
-        if ingest_payload['submission_bundles_exported_count'] == 0:
+        if dss_payload['aws_primary_bundle_count'] == 0:
             primary_state = 'INCOMPLETE'
         elif ingest_payload['submission_bundles_exported_count'] % dss_payload['aws_primary_bundle_count'] != 0:
             primary_state = 'INCOMPLETE'

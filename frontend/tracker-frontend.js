@@ -98,8 +98,14 @@ $(document).ready(function() {
         var dssAwsAnalysisBundleCount = dssInfo['aws_analysis_bundle_count']
         var dssGcpPrimaryBundleCount = dssInfo['gcp_primary_bundle_count']
         var dssGcpAnalysisBundleCount = dssInfo['gcp_analysis_bundle_count']
-        var dssPrimaryBundleCountDisplay = "AWS: " + dssAwsPrimaryBundleCount + "<br>GCP: " + dssGcpPrimaryBundleCount
-        var dssAnalysisBundleCountDisplay = "AWS: " + dssAwsAnalysisBundleCount + "<br>GCP: " + dssGcpAnalysisBundleCount
+        var dssAwsPrimaryBundleFQIDCount = dssInfo['aws_primary_bundle_fqids_count']
+        var dssAwsAnalysisBundleFQIDCount = dssInfo['aws_analysis_bundle_fqids_count']
+        var dssGcpPrimaryBundleFQIDCount = dssInfo['gcp_primary_bundle_fqids_count']
+        var dssGcpAnalysisBundleFQIDCount = dssInfo['gcp_analysis_bundle_fqids_count']
+        var dssPrimaryBundleCountDisplay = "<b>UUIDs</b><br> AWS: " + dssAwsPrimaryBundleCount + "<br>GCP: " + dssGcpPrimaryBundleCount +
+            "<br><b>FQIDs</b><br> AWS: " + dssAwsPrimaryBundleFQIDCount + "<br>GCP: " + dssGcpPrimaryBundleFQIDCount
+        var dssAnalysisBundleCountDisplay = "<b>UUIDs</b><br> AWS: " + dssAwsAnalysisBundleCount + "<br>GCP: " + dssGcpAnalysisBundleCount +
+            "<br><b>FQIDs</b><br> AWS: " + dssAwsAnalysisBundleFQIDCount + "<br>GCP: " + dssGcpAnalysisBundleFQIDCount
         dssPrimaryBundleCountDisplay = convertTextToDisplayDiv(dssPrimaryBundleCountDisplay, dssPrimaryState)
         dssAnalysisBundleCountDisplay = convertTextToDisplayDiv(dssAnalysisBundleCountDisplay, dssAnalysisState)
 
@@ -117,7 +123,7 @@ $(document).ready(function() {
                 var worfklowStatusMessage = '<a href="' + workflowLink + '"target="_blank">' + workflowStatus + ': ' + val + '</a>'
                 workflowStatsByStatusDisplay = workflowStatsByStatusDisplay + worfklowStatusMessage + '<br>'
             }
-            else if(key != 'total_workflows' && key != 'analysis_state' && key != 'updated_at' && key != 'project_uuid'){
+            else if(key.includes('_v') ){
                 var workflowLink = project_and_version_job_manager_link_template.replace('{PROJECT_UUID}', projectUUID).replace('{WORKFLOW_VERSION}', key)
                 var worfklowVersionMessage = '<a href="' + workflowLink + '"target="_blank">' + key + ': ' + val + '</a>'
                 workflowStatsByVersionDisplay = workflowStatsByVersionDisplay + worfklowVersionMessage + '<br>'

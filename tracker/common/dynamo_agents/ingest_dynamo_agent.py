@@ -1,6 +1,9 @@
 from collections import Counter
 import os
 
+from dcplib.component_agents import IngestApiAgent
+from dcplib.component_entities.ingest_entities import SubmissionEnvelope
+
 from tracker.common.dynamo_agents.dynamo_agent import DynamoAgent
 
 
@@ -11,6 +14,7 @@ class IngestDynamoAgent(DynamoAgent):
         deployment_stage = os.environ["DEPLOYMENT_STAGE"]
         self.dynamo_table_name = f"dcp-data-dashboard-ingest-info-{deployment_stage}"
         self.table_display_name = "ingest-info"
+        self.ingest_agent = IngestApiAgent(deployment=deployment_stage)
 
     def create_dynamo_payload(self, envelope, latest_primary_bundles, analysis_envelopes_map={}):
         print(f"creating ingest info payload for {envelope.submission_id}")
@@ -54,7 +58,8 @@ class IngestDynamoAgent(DynamoAgent):
             for envelope in envelopes:
                 if envelope['update_date'] > latest_analysis_envelope_update_date:
                     latest_analysis_envelope_update_date = envelope['update_date']
-                if len(envelope.submission_errors()) > 0:
+                envelope_api_record = SubmissionEnvelope.load_by_id(envelope['submission_id'], ingest_api_agent=self.ingest_agent)
+                if len(envelope_api_record.submission_errors()) > 0:
                     envelope_failures_present = True
                 status = envelope['submission_status']
                 envelope_statuses_count[status] += 1
