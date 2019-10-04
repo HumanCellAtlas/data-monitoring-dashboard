@@ -113,7 +113,8 @@ resource "aws_iam_role_policy" "AWS-Events-Invoke" {
                 "ecs:RunTask"
             ],
             "Resource": [
-                "arn:aws:ecs:*:${var.account_id}:task-definition/data-monitoring-data-refresher-${var.deployment_stage}:*"
+                "arn:aws:ecs:*:${var.account_id}:task-definition/data-monitoring-data-refresher-${var.deployment_stage}:*",
+                "arn:aws:ecs:*:${var.account_id}:task-definition/data-monitoring-analysis-envelope-refresher-${var.deployment_stage}:*"
             ],
             "Condition": {
                 "ArnLike": {
