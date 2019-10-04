@@ -16,6 +16,7 @@ METHODS_SUPPORTED_FOR_WORKFLOWS = [
     "10X 3' v2 sequencing mus musculus",
     "10X 3' v2 sequencing paired-end mus musculus",
     "Smart-seq2 paired-end homo sapiens",
+    "Smart-seq2 paired-end mus musculus"
 ]
 
 
