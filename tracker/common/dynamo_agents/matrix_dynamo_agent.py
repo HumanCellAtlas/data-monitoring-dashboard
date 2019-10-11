@@ -10,9 +10,12 @@ METHODS_SUPPORTED_FOR_MATRIX = [
     "10X 3' v2 sequencing paired-end homo sapiens",
     "10X v2 sequencing homo sapiens",
     "10X v2 sequencing paired-end homo sapiens",
+    "Smart-seq2 paired-end homo sapiens",
+    "10x 3' v2 sequencing mus musculus",
+    "10X 3' v2 sequencing paired-end mus musculus",
     "10X v2 sequencing mus musculus",
     "10X v2 sequencing paired-end mus musculus",
-    "Smart-seq2 paired-end homo sapiens"
+    "Smart-seq2 paired-end mus musculus"
 ]
 
 

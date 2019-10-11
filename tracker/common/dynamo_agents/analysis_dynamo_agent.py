@@ -42,18 +42,19 @@ class AnalysisDynamoAgent(DynamoAgent):
         for version, wf_count in wfs_count_by_version.items():
             payload[version] = wf_count
         payload['total_workflows'] = len(workflows)
+        workflows_expected = self._workflow_count_expected_for_project(azul_project_info)
+        payload['expected_workflows'] = workflows_expected
         payload['analysis_state'] = self._determine_state_of_workflows(workflows,
                                                                        latest_primary_bundles,
                                                                        envelope,
                                                                        project_uuid,
-                                                                       azul_project_info)
+                                                                       workflows_expected)
         payload['failures_present'] = False
         if payload.get('failed_workflows'):
             payload['failures_present'] = True
         return payload
 
-    def _determine_state_of_workflows(self, workflows, latest_primary_bundles, envelope, project_uuid, azul_info):
-        workflows_expected = self._workflow_count_expected_for_project(azul_info)
+    def _determine_state_of_workflows(self, workflows, latest_primary_bundles, envelope, project_uuid, workflows_expected):
         latest_input_bundle_versions_with_successful_workflows = set()
         input_bundle_uuids_with_successful_workflows = set()
         for workflow in workflows:
