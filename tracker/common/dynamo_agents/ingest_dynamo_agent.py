@@ -21,6 +21,7 @@ class IngestDynamoAgent(DynamoAgent):
         payload = {}
         project = envelope.project()
         payload['submission_id'] = envelope.submission_id
+        payload['submission_uuid'] = envelope.uuid
         payload['submission_date'] = envelope.submission_date
         payload['update_date'] = envelope.update_date
         payload['project_uuid'] = project.uuid

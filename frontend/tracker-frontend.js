@@ -40,9 +40,9 @@ $(document).ready(function() {
         urlBase = location.host.split('.').slice(1).join('.')
         return location.protocol + '//' + urlBase + '/explore/projects/' + projectUUID
     }
-    function getSubmissionIngestApiUrl(submissionId){
+    function getSubmissionUIUrl(submissionUuid){
         urlBase = location.host.split('.').slice(1).join('.')
-        return location.protocol + '//api.ingest.' + urlBase + '/submissionEnvelopes/' + submissionId
+        return location.protocol + '//ui.ingest.' + urlBase + '/submissions/detail?uuid=' + submissionUuid
     }
     var dataSet = []
     projectsApiEndpoint = getTrackerApiUrl() + 'v0/projects'
@@ -56,17 +56,18 @@ $(document).ready(function() {
         overallProjectStateDisplay = convertTextToDisplayDiv(overallProjectState, overallProjectState)
 
         var ingestRecords = val['ingest-info']
-        var submissionIds = ''
+        var submissionUuids = ''
         var ingestInfo = ingestRecords[0]
         $.each(ingestRecords, function(key, val){
             var submissionId = val['submission_id']
-            var submissionIdDisplay = "<a target='_blank' href='" + getSubmissionIngestApiUrl(submissionId) + "'>" + submissionId + "</a>"
+            var submissionUuid = val['submission_uuid']
+            var submissionUuidDisplay = "<a target='_blank' href='" + getSubmissionUIUrl(submissionUuid) + "'>" + submissionUuid + "</a>"
             if(submissionId == projectInfo['latest_submission_id']){
-                submissionIds = submissionIds + '<b>' + submissionIdDisplay + '</b><br>'
+                submissionUuids = submissionUuids + '<b>' + submissionUuidDisplay + '</b><br>'
                 ingestInfo = val
             }
             else {
-                submissionIds = submissionIds + submissionIdDisplay + '<br>'
+                submissionUuids = submissionUuids + submissionUuidDisplay + '<br>'
             }
         })
         var ingestPrimaryState = ingestInfo['primary_state']
@@ -167,7 +168,7 @@ $(document).ready(function() {
             overallProjectStateDisplay,
             smallText(submissionDate),
             smallText(projectUUIDDisplay),
-            smallText(submissionIds),
+            smallText(submissionUuids),
             smallText(species),
             smallText(methods),
             submissionStatusDisplay,
