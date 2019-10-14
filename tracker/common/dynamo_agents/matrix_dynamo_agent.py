@@ -35,11 +35,14 @@ class MatrixDynamoAgent(DynamoAgent):
         payload['project_uuid'] = project_uuid
         bundles_indexed = self.agent.get_bundles_for_project(project_uuid)
         matrix_bundles_expected = self._matrix_bundle_count_expected_for_project(azul_info)
+        project_matrices = len(self.agent.get_project_matrices(project_uuid))
         payload['analysis_bundle_count'] = len(bundles_indexed)
         payload['cell_count'] = self.agent.get_cell_count_for_project(project_uuid)
+        payload['project_matrices'] = project_matrices
         payload['analysis_state'] = self._determine_state_of_analysis_data(bundles_indexed,
                                                                            latest_analysis_bundles,
-                                                                           matrix_bundles_expected)
+                                                                           matrix_bundles_expected,
+                                                                           project_matrices)
         return payload
 
     def _matrix_bundle_count_expected_for_project(self, azul_info):
@@ -50,7 +53,7 @@ class MatrixDynamoAgent(DynamoAgent):
                 matrix_bundles_expected += project_bundle_type_counter[method.lower()]
         return matrix_bundles_expected
 
-    def _determine_state_of_analysis_data(self, query_results, latest_analysis_bundles, matrix_bundles_expected):
+    def _determine_state_of_analysis_data(self, query_results, latest_analysis_bundles, matrix_bundles_expected, project_matrices):
         all_bundle_uuids_indexed = set()
         bundle_uuids_indexed_on_latest = set()
         for result in query_results:
@@ -64,6 +67,8 @@ class MatrixDynamoAgent(DynamoAgent):
 
         if matrix_bundles_expected == 0:
             return 'NOT_EXPECTED'
+        elif project_matrices != 3:
+            return 'INCOMPLETE'
         elif len(all_bundle_uuids_indexed) != matrix_bundles_expected:
             return 'INCOMPLETE'
         elif len(bundle_uuids_indexed_on_latest) != matrix_bundles_expected:

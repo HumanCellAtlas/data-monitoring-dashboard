@@ -160,8 +160,10 @@ $(document).ready(function() {
 
         var matrixAnalysisBundleCount = matrixInfo['analysis_bundle_count']
         var matrixCellCount = matrixInfo['cell_count']
+        var projectMatricesCount = matrixInfo['project_matrices']
         matrixAnalysisBundleCountDisplay = convertTextToDisplayDiv(matrixAnalysisBundleCount, matrixAnalysisState)
         matrixCellCountDisplay = convertTextToDisplayDiv(matrixCellCount, matrixAnalysisState)
+        projectMatricesCountDisplay = convertTextToDisplayDiv(projectMatricesCount, matrixAnalysisState)
 
         var project = [
             projectTitle,
@@ -182,6 +184,7 @@ $(document).ready(function() {
             azulAnalysisBundleCountDisplay,
             matrixAnalysisBundleCountDisplay,
             matrixCellCountDisplay,
+            projectMatricesCountDisplay,
             projectShortName
         ]
 
@@ -222,10 +225,10 @@ $(document).ready(function() {
         order: [[ 2, "desc" ]],
         columnDefs: [
             {
-               targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+               targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
                className: 'dt-left'
             },
-            { type: 'num-html', targets: [8, 10, 14, 15, 16] }
+            { type: 'num-html', targets: [8, 10, 14, 15, 16, 17, 18] }
         ],
         drawCallback: function( settings ) {
             $('.red').parent('.dt-left').css('background', '#f5dad6');

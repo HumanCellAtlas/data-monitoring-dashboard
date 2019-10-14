@@ -1,5 +1,7 @@
 import os
 
+import boto3
+
 from dcplib.config import Config
 try:
     import psycopg2 as pg
@@ -16,8 +18,10 @@ class MatrixRedshiftConfig(Config):
 class MatrixAgent:
 
     def __init__(self):
-        self.deployment = os.environ["DEPLOYMENT_STAGE"]
+        self.deployment = os.environ['DEPLOYMENT_STAGE']
         self.redshift_config = MatrixRedshiftConfig()
+        self.s3_client = boto3.client('s3')
+        self.project_matrix_bucket = 'project-assets.data.humancellatlas.org'
 
     def get_cell_count_for_project(self, project_uuid):
         query = f"select count(*) from cell where projectkey = '{project_uuid}'"
@@ -31,6 +35,11 @@ class MatrixAgent:
             where cell.projectkey = '{project_uuid}');"
         results = self._run_query(query)
         return results
+
+    def get_project_matrices(self, project_uuid):
+        prefix = f'project-assets/project-matrices/{project_uuid}'
+        response = self.s3_client.list_objects(Bucket=self.project_matrix_bucket, Prefix=prefix)
+        return response.get('Contents', [])
 
     @property
     def readonly_database_uri(self):
