@@ -36,8 +36,8 @@ class AnalysisAgent:
         """
         # Note: this query dict automatically filters out any workflows that
         # labeled with the key:values pairs in the `excludeLabelOr` list. 
-        # the labeling mechanism is fully relying on the analysis component 
-        # and the data operations team
+        # the labeling mechanism is fully relying on the work of analysis 
+        # component and the data operations team
         query_dict = {
             "label": {
                 "project_uuid": project_uuid
