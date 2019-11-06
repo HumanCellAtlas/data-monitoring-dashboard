@@ -34,10 +34,15 @@ class AnalysisAgent:
         Returns:
             result: A list of workflow metadata blocks that matched the query.
         """
+        # Note: this query dict automatically filters out any workflows that
+        # labeled with the key:values pairs in the `excludeLabelOr` list. 
+        # the labeling mechanism is fully relying on the analysis component 
+        # and the data operations team
         query_dict = {
             "label": {
                 "project_uuid": project_uuid
-            }
+            },
+        'excludeLabelOr': ['comment:erased'],
         }
         if with_labels:
             query_dict['additionalQueryResultFields'] = ['labels']
