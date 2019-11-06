@@ -205,6 +205,13 @@ resource "aws_iam_role_policy" "data_refresher" {
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-project-info-${var.deployment_stage}",
             "arn:aws:dynamodb:us-east-1:${var.account_id}:table/dcp-data-dashboard-ingest-analysis-envelopes-info-${var.deployment_stage}"
           ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "cloudwatch:PutMetricData"
+          ],
+          "Resource": "*"
         }
     ]
 }

@@ -28,4 +28,5 @@ module "data-monitoring" {
   refresher_schedule_expression = "${var.refresher_schedule_expression}"
   data_refresher_image = "${var.data_refresher_image}"
   cloudfront_id = "${var.cloudfront_id}"
+  github_access_token = "${var.github_access_token}"
 }

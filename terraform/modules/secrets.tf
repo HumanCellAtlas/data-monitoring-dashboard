@@ -7,7 +7,8 @@ resource "aws_secretsmanager_secret_version" "tracker_secrets" {
   secret_string = <<SECRETS_JSON
 {
   "analysis_gcp_creds": "${var.analysis_gcp_creds}",
-  "cloudfront_id": "${var.cloudfront_id}"
+  "cloudfront_id": "${var.cloudfront_id}",
+  "github_access_token": "${var.github_access_token}"
 }
 SECRETS_JSON
 }

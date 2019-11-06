@@ -38,8 +38,11 @@ class MatrixAgent:
 
     def get_project_matrices(self, project_uuid):
         prefix = f'project-assets/project-matrices/{project_uuid}'
-        response = self.s3_client.list_objects(Bucket=self.project_matrix_bucket, Prefix=prefix)
-        return response.get('Contents', [])
+        try:
+            response = self.s3_client.list_objects(Bucket=self.project_matrix_bucket, Prefix=prefix)
+            return response.get('Contents', [])
+        except:
+            return []
 
     @property
     def readonly_database_uri(self):

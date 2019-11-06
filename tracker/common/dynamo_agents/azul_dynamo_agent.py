@@ -14,7 +14,7 @@ class AzulDynamoAgent(DynamoAgent):
         self.table_display_name = "azul-info"
         self.azul_agent = AzulAgent()
 
-    def create_dynamo_payload(self, project_uuid, latest_primary_bundles, latest_analysis_bundles):
+    def create_dynamo_payload(self, project_uuid, latest_primary_bundles, latest_analysis_bundles, bundle_map):
         print(f"creating azul info payload for {project_uuid}")
         bundles = self.azul_agent.get_entities_by_project('bundles', project_uuid)
         primary_bundles_indexed = []

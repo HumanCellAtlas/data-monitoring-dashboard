@@ -25,3 +25,7 @@ variable "data_refresher_image" {
 variable "cloudfront_id" {
   type = "string"
 }
+
+variable "github_access_token" {
+  type = "string"
+}

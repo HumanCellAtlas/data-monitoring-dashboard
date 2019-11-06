@@ -24,16 +24,14 @@ def get_projects():
 
 
 def get_project(project_uuid):
-    project_payload = {}
-    project_payload['project_uuid'] = project_uuid
+    projects_dict = defaultdict(dict)
     for dynamo_agent in DYNAMO_REFRESHERS:
         dynamo_handler = dynamo_agent()
-        payload = dynamo_handler.get_item_from_dynamo('project_uuid', project_uuid)
-        record = payload['record']
-        del record['project_uuid']
-        table_name = payload['table_name']
-        project_payload[table_name] = record
-    return project_payload
+        payload = dynamo_handler.get_all_items()
+        projects_dict = _parse_by_project_uuid(projects_dict, payload['records'], payload['table_name'])
+    for uuid, project_info_dict in projects_dict.items():
+        if uuid == project_uuid:
+            return project_info_dict
 
 
 def _parse_by_project_uuid(target_project_dict, source_records_list, table_name):

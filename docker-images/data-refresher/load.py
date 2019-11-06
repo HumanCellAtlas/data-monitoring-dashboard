@@ -8,6 +8,7 @@ from hca.util.pool import ThreadPool
 from dcplib.component_agents import IngestApiAgent
 from dcplib.component_entities.ingest_entities import SubmissionEnvelope
 
+from tracker.data_report import DataReport
 from tracker.common.dynamo_agents.ingest_dynamo_agent import IngestDynamoAgent
 from tracker.common.dynamo_agents.ingest_analysis_dynamo_agent import IngestAnalysisDynamoAgent
 from tracker.common.dynamo_agents.dss_dynamo_agent import DSSDynamoAgent
@@ -40,6 +41,7 @@ analysis_dynamo_agent = AnalysisDynamoAgent()
 matrix_dynamo_agent = MatrixDynamoAgent()
 azul_dynamo_agent = AzulDynamoAgent()
 project_dynamo_agent = ProjectDynamoAgent()
+data_report = DataReport()
 
 
 class Statistics:
@@ -71,7 +73,7 @@ class Statistics:
             cls.time_of_last_report = time.time()
 
 
-def track_envelope_data_moving_through_dcp(envelope, analysis_envelopes_map, failures):
+def track_envelope_data_moving_through_dcp(envelope, analysis_envelopes_map, bundle_map, failures):
     if envelope.submission_date < SUBMISSION_DATE_CUTOFF:
         Statistics.increment('envelope_too_old')
         return
@@ -93,7 +95,10 @@ def track_envelope_data_moving_through_dcp(envelope, analysis_envelopes_map, fai
     try:
         latest_primary_bundles, latest_analysis_bundles = dss_dynamo_agent.latest_primary_and_analysis_bundles_for_project(project.uuid)
         ingest_submission_payload = ingest_dynamo_agent.create_dynamo_payload(envelope, latest_primary_bundles, analysis_envelopes_map)
-        azul_project_payload = azul_dynamo_agent.create_dynamo_payload(project.uuid, latest_primary_bundles, latest_analysis_bundles)
+        azul_project_payload = azul_dynamo_agent.create_dynamo_payload(project.uuid,
+                                                                       latest_primary_bundles,
+                                                                       latest_analysis_bundles,
+                                                                       bundle_map)
         analysis_project_payload = analysis_dynamo_agent.create_dynamo_payload(envelope,
                                                                                latest_primary_bundles,
                                                                                azul_project_payload)
@@ -164,6 +169,7 @@ def _exit_on_signal(sig, frame):
 
 def main():
     failures = {}
+    bundle_map = defaultdict(dict)
     signal.signal(signal.SIGINT, _exit_on_signal)
     ingest_agent = IngestApiAgent(deployment=DEPLOYMENT_STAGE)
     analysis_envelopes_map = ingest_analysis_dynamo_agent.create_analysis_envelopes_bundle_map()
@@ -176,11 +182,17 @@ def main():
             pool.add_task(track_analysis_envelope, envelope, failures)
         else:
             # REFRESH DATA FROM ALL COMPONENTS FOR ALL EXISTING AND NEW PROJECTS. RUNS ONCE AN HOUR.
-            pool.add_task(track_envelope_data_moving_through_dcp, envelope, analysis_envelopes_map, failures)
+            pool.add_task(track_envelope_data_moving_through_dcp,
+                          envelope,
+                          analysis_envelopes_map,
+                          bundle_map,
+                          failures)
     pool.wait_for_completion()
 
     if not ANALYSIS_ENVELOPE_COLLECTION_JOB:
         create_overall_project_payloads()
+        data_report.retrieve()
+        data_report.post_to_cloudwatch()
 
     Statistics.report(force=True)
     print(f"{len(failures)} projects failed during refresh")

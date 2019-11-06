@@ -90,10 +90,11 @@ $(document).ready(function() {
         // PROJECT INFO DISPLAY
         var lastUpdatedAt = new Date(azulInfo['updated_at']).toLocaleString()
         var submissionDate = new Date(ingestInfo['submission_date']).toISOString().substring(0, 10);
+        var githubIssueLink = "<a href='https://github.com/HumanCellAtlas/dcp/issues/" + projectInfo['github_issue'] + "'>Github Issue</a>"
         var projectLinkButton = "<button data-id='" + projectUUID + "' class='copy-button'>Shareable link</button>"
         var primaryInvestigatorDisplay = '<br><b>PIs: </b>' + ingestInfo['primary_investigator']
         var dataWranglerDisplay = '<b>Wranglers: </b>' + ingestInfo['data_curator']
-        var projectTitle = '<b>' + ingestInfo['project_title'] + '</b><br>' + smallText(projectLinkButton) + '<br>' + smallText(primaryInvestigatorDisplay) + '<br>' + smallText(dataWranglerDisplay)
+        var projectTitle = '<b>' + ingestInfo['project_title'] + '</b><br>' + smallText(projectLinkButton) + '<br>' + smallText(primaryInvestigatorDisplay) + '<br>' + smallText(dataWranglerDisplay) + '<br><br>' + githubIssueLink
         var projectShortName = '<b>' + ingestInfo['project_short_name'] + '</b><br><smallText>Stats refreshed at: ' + lastUpdatedAt + '</smallText>'
         var submissionId = ingestInfo['submission_id']
         var species = azulInfo['species']
