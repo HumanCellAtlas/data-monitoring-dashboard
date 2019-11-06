@@ -66,7 +66,7 @@ class ProjectDynamoAgent(DynamoAgent):
             response = requests.get(project_api_url)
             response.raise_for_status()
             return response.json()
-        except:
+        except Exception as e:
             return {}
 
     def _get_tracker_ui_project_url(self, project_uuid):

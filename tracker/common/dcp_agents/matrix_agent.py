@@ -41,7 +41,7 @@ class MatrixAgent:
         try:
             response = self.s3_client.list_objects(Bucket=self.project_matrix_bucket, Prefix=prefix)
             return response.get('Contents', [])
-        except:
+        except Exception as e:
             return []
 
     @property
