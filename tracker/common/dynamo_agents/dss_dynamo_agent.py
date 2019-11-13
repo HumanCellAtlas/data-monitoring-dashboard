@@ -82,6 +82,8 @@ class DSSDynamoAgent(DynamoAgent):
             analysis_bundles_expected = 7628
         elif project_uuid == 'f8aa201c-4ff1-45a4-890e-840d63459ca2' and analysis_bundles_expected == 17:
             analysis_bundles_expected = 10
+        elif project_uuid == 'abe1a013-af7a-45ed-8c26-f3793c24a1f4' and analysis_bundles_expected == 69:
+            analysis_bundles_expected = 22
 
         if analysis_bundles_expected == 0:
             analysis_state = 'NOT_EXPECTED'

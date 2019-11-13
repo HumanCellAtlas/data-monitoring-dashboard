@@ -79,7 +79,7 @@ class AnalysisDynamoAgent(DynamoAgent):
 
         if workflows_expected == 0:
             return 'NOT_EXPECTED'
-        elif len(input_bundle_uuids_with_successful_workflows) != workflows_expected:
+        elif len(input_bundle_uuids_with_successful_workflows) < workflows_expected:
             return 'INCOMPLETE'
         else:
             return 'COMPLETE'

@@ -67,7 +67,7 @@ class MatrixDynamoAgent(DynamoAgent):
 
         if matrix_bundles_expected == 0:
             return 'NOT_EXPECTED'
-        elif project_matrices != 3:
+        elif project_matrices % 3 != 0:
             return 'INCOMPLETE'
         elif len(all_bundle_uuids_indexed) != matrix_bundles_expected:
             return 'INCOMPLETE'
