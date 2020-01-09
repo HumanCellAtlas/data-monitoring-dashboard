@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "site_bucket" {
 }
 
 resource "aws_s3_bucket_policy" "site_bucket_policy" {
-  bucket = "${aws_s3_bucket.site_bucket.id}"
+  bucket =  aws_s3_bucket.site_bucket.id
 
   policy = <<POLICY
 {

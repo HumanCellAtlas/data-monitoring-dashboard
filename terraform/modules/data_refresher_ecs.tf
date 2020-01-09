@@ -1,8 +1,8 @@
 resource "aws_ecs_task_definition" "data_refresher" {
   family                = "data-monitoring-data-refresher-${var.deployment_stage}"
   requires_compatibilities = ["FARGATE"]
-  execution_role_arn = "${aws_iam_role.task_executor.arn}"
-  task_role_arn = "${aws_iam_role.data_refresher.arn}"
+  execution_role_arn =  aws_iam_role.task_executor.arn
+  task_role_arn =  aws_iam_role.data_refresher.arn
   cpu = "4096"
   memory = "8192"
   network_mode = "awsvpc"
@@ -34,8 +34,8 @@ DEFINITION
 resource "aws_ecs_task_definition" "analysis_envelope_refresher" {
   family                = "data-monitoring-analysis-envelope-refresher-${var.deployment_stage}"
   requires_compatibilities = ["FARGATE"]
-  execution_role_arn = "${aws_iam_role.task_executor.arn}"
-  task_role_arn = "${aws_iam_role.data_refresher.arn}"
+  execution_role_arn =  aws_iam_role.task_executor.arn
+  task_role_arn =  aws_iam_role.data_refresher.arn
   cpu = "4096"
   memory = "8192"
   network_mode = "awsvpc"
@@ -96,13 +96,13 @@ EOF
 }
 
 resource "aws_iam_role_policy_attachment" "task_executor_ecs" {
-  role = "${aws_iam_role.task_executor.name}"
+  role =  aws_iam_role.task_executor.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_iam_role_policy" "AWS-Events-Invoke" {
   name = "data-monitoring-refresher-event-invoke-${var.deployment_stage}"
-  role = "${aws_iam_role.task_executor.id}"
+  role =  aws_iam_role.task_executor.id
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -161,7 +161,7 @@ EOF
 
 resource "aws_iam_role_policy" "data_refresher" {
   name = "data-monitoring-data-refresher-policy-${var.deployment_stage}"
-  role = "${aws_iam_role.data_refresher.id}"
+  role =  aws_iam_role.data_refresher.id
   policy = <<EOF
 {
     "Version": "2012-10-17",
@@ -237,17 +237,17 @@ data "aws_iam_policy_document" "events_assume_role_policy" {
 resource "aws_cloudwatch_event_rule" "data_refresher" {
   name                = "tracker-data-refresher-cron-rule-${var.deployment_stage}"
   description         = "Runs fargate task data monitoring data tracker refresher with a cron rule"
-  schedule_expression = "${var.refresher_schedule_expression}"
+  schedule_expression =  var.refresher_schedule_expression
 }
 
 resource "aws_cloudwatch_event_target" "data_refresher_scheduled_task" {
-  rule      = "${aws_cloudwatch_event_rule.data_refresher.name}"
-  arn       = "${aws_ecs_cluster.data_refresher.arn}"
-  role_arn  = "${aws_iam_role.task_executor.arn}"
+  rule      =  aws_cloudwatch_event_rule.data_refresher.name
+  arn       =  aws_ecs_cluster.data_refresher.arn
+  role_arn  =  aws_iam_role.task_executor.arn
 
   ecs_target = {
     task_count          = 1
-    task_definition_arn = "${aws_ecs_task_definition.data_refresher.arn}"
+    task_definition_arn =  aws_ecs_task_definition.data_refresher.arn
     launch_type         = "FARGATE"
     platform_version    = "LATEST"
 
@@ -266,13 +266,13 @@ resource "aws_cloudwatch_event_rule" "analysis_envelope_refresher" {
 }
 
 resource "aws_cloudwatch_event_target" "analysis_envelope_refresher_scheduled_task" {
-  rule      = "${aws_cloudwatch_event_rule.analysis_envelope_refresher.name}"
-  arn       = "${aws_ecs_cluster.data_refresher.arn}"
-  role_arn  = "${aws_iam_role.task_executor.arn}"
+  rule      =  aws_cloudwatch_event_rule.analysis_envelope_refresher.name
+  arn       =  aws_ecs_cluster.data_refresher.arn
+  role_arn  =  aws_iam_role.task_executor.arn
 
   ecs_target = {
     task_count          = 1
-    task_definition_arn = "${aws_ecs_task_definition.analysis_envelope_refresher.arn}"
+    task_definition_arn =  aws_ecs_task_definition.analysis_envelope_refresher.arn
     launch_type         = "FARGATE"
     platform_version    = "LATEST"
 

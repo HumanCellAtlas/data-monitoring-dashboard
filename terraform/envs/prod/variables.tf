@@ -1,31 +1,31 @@
 variable "deployment_stage" {
-  type = "string"
+  type = string
 }
 
 variable "analysis_gcp_creds" {
-  type = "string"
+  type = string
 }
 
 variable "allowed_subnet_ids" {
-  type = "string"
+  type = string
 }
 
 variable "security_group_id" {
-  type = "string"
+  type = string
 }
 
 variable "refresher_schedule_expression" {
-  type = "string"
+  type = string
 }
 
 variable "data_refresher_image" {
-  type = "string"
+  type = string
 }
 
 variable "cloudfront_id" {
-  type = "string"
+  type = string
 }
 
 variable "github_access_token" {
-  type = "string"
+  type = string
 }
