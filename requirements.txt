@@ -9,3 +9,5 @@ hca >= 6.3.0, <7
 psycopg2-binary==2.7.5
 dcplib >= 3.2.1, < 4
 PyGithub
+pyjwt>=2.4.0 # not directly required, pinned by Snyk to avoid a vulnerability
+urllib3>=1.26.5 # not directly required, pinned by Snyk to avoid a vulnerability
